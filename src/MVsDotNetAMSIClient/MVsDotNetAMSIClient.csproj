@@ -6,16 +6,14 @@
     <Copyright>Mirek Vales 2020</Copyright>
     <ApplicationIcon>package.ico</ApplicationIcon>
     <PackageIcon>package.ico</PackageIcon>
+    <IconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.ico</IconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.ico</PackageIconUrl>
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="package.ico" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="package.ico" />
   </ItemGroup>
 
   <ItemGroup>
