@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -50,6 +51,15 @@ namespace MVsDotNetAMSIClient.DataStructures
             using (var hashProvider = MD5.Create())
                 return string.Concat(hashProvider
                     .ComputeHash(data)
+                    .Select(@byte => @byte.ToString("x2")));
+        }
+
+        internal static string GetFileMD5Hash(this FileInfo info)
+        {
+            using (var hashProvider = MD5.Create())
+            using (var stream = File.OpenRead(info.FullName))
+                return string.Concat(hashProvider
+                    .ComputeHash(stream)
                     .Select(@byte => @byte.ToString("x2")));
         }
     }

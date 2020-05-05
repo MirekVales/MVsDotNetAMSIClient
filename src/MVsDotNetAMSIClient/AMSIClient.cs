@@ -66,6 +66,12 @@ namespace MVsDotNetAMSIClient
                 return session.ScanBuffer(buffer, length, contentName);
         }
 
+        public ScanResult ScanFile(string path, int blockSize, bool scanOverlaps)
+        {
+            using (var reader = new BlockFileScanner(this, path, blockSize, scanOverlaps))
+                return reader.Scan();
+        }
+
         public ScanResult TestEICARString()
             => ScanString(EICARTestData.EICARText, nameof(EICARTestData.EICARText));
 

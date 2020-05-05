@@ -13,6 +13,10 @@
         /// <summary>
         /// Scanned content is array of bytes
         /// </summary>
-        ByteArray
+        ByteArray,
+        /// <summary>
+        /// Scanned content is file
+        /// </summary>
+        File
     }
 }
