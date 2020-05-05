@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DetailProviders;
@@ -14,7 +15,8 @@ namespace MVsDotNetAMSIClient.DataStructures
 
         internal ScanResult ToResult(int detectionResultNumber)
         {
-            var detail = ScanContext.Client.Configuration.SkipScanResultDetailRetrieval
+            var result = GetDetectionResult(detectionResultNumber);
+            var detail = ScanContext.Client.Configuration.SkipScanResultDetailRetrieval || !IsBreakResult(result)
                 ? null
                 : DetailProviderFactory
                     .GetDetailProvider(ScanContext.Client.DetectionEngine)?.GetDetail(this);
@@ -30,7 +32,7 @@ namespace MVsDotNetAMSIClient.DataStructures
 
                 MalwareId = detectionResultNumber,
                 ThreatLevel = Math.Min(1, (float)Math.Round(detectionResultNumber / 32768d, 2)),
-                Result = GetDetectionResult(detectionResultNumber),
+                Result = result,
                 ResultDetail = null,
 
                 ScanProcessAppName = ScanContext.Client.Name,
@@ -78,5 +80,14 @@ namespace MVsDotNetAMSIClient.DataStructures
 
             return DetectionResult.BlockedByAdministrator;
         }
+
+        internal static HashSet<DetectionResult> BreakResults = new HashSet<DetectionResult>(new [] {
+                DetectionResult.ApplicationError
+                , DetectionResult.BlockedByAdministrator
+                , DetectionResult.IdentifiedAsMalware });
+
+        internal static bool IsBreakResult(DetectionResult result)
+            => BreakResults.Contains(result);
+
     }
 }

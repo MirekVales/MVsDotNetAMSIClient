@@ -66,9 +66,16 @@ namespace MVsDotNetAMSIClient
                 return session.ScanBuffer(buffer, length, contentName);
         }
 
-        public ScanResult ScanFile(string path, int blockSize, bool scanOverlaps)
+        public ScanResult ScanFile(string filePath)
         {
-            using (var reader = new BlockFileScanner(this, path, blockSize, scanOverlaps))
+            using (var reader = new BlockFileScanner(
+                this, filePath, Configuration.FileScannerBlockSize, !Configuration.FileScannerSkipOverlapsScanning, !Configuration.FileScannerSkipZipFileInspection))
+                return reader.Scan();
+        }
+
+        public ScanResult ScanFile(string filePath, int blockSize, bool scanOverlaps, bool inspectZipFiles)
+        {
+            using (var reader = new BlockFileScanner(this, filePath, blockSize, scanOverlaps, inspectZipFiles))
                 return reader.Scan();
         }
 

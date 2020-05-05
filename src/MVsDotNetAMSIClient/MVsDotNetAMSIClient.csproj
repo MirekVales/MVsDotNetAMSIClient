@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="4.7.0" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>

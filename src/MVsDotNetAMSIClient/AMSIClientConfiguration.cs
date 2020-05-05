@@ -31,6 +31,24 @@ namespace MVsDotNetAMSIClient
         /// </summary>
         public TimeSpan MaximumScanResultRetrievalTime { get; set; } = TimeSpan.FromSeconds(2.5);
 
+        /// <summary>
+        /// If file is to be scanned, it is first split into byte array chunks that are sent to AMSI 
+        /// Default value of chunks size is 10 MB
+        /// </summary>
+        public int FileScannerBlockSize { get; set; } = 10 * 1000 * 1000;
+
+        /// <summary>
+        /// File scanner tries to avoid missing detection by performing extra scan of segment
+        /// that is created by taking last half of previous chunk and first half of next chunk
+        /// This costs additional time but increases effectivity of scan
+        /// </summary>
+        public bool FileScannerSkipOverlapsScanning { get; set; }
+
+        /// <summary>
+        /// File scanner tries to analyze entries compressed in ZIP archive
+        /// </summary>
+        public bool FileScannerSkipZipFileInspection { get; set; }
+
         public static AMSIClientConfiguration Default
             => new AMSIClientConfiguration();
     }
