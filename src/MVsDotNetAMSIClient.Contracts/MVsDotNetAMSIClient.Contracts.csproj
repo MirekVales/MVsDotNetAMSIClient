@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Mirek Vales</Authors>
+    <ApplicationIcon>package.ico</ApplicationIcon>
+    <PackageIcon>package.ico</PackageIcon>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="package.ico" Pack="true" PackagePath=""/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="package.ico" />
+  </ItemGroup>
+
+</Project>
