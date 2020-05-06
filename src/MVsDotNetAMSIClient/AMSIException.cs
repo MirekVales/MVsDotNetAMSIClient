@@ -26,7 +26,13 @@ namespace MVsDotNetAMSIClient
         public static AMSIException NoDetectionEngineFound
             => new AMSIException("No detection engine found. AMSI call cannot be executed");
 
-        public static Exception FailedToInitialize { get; internal set; }
-        public static Exception FailedToInitializeSession { get; internal set; }
+        public static AMSIException FailedToInitialize()
+            => new AMSIException("AMSI failed to initialize");
+
+        public static AMSIException FailedToInitializeSession()
+            => new AMSIException("AMSI failed to initialize session");
+
+        public static AMSIException ZipContainsCryptedEntry(string entryName)
+            => new AMSIException($"Zip archive contains encrypted entry {entryName}. AMSI call cannot be executed");
     }
 }

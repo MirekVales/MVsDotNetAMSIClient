@@ -21,13 +21,13 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal static void CheckHandle(this AMSIHandleContext handleContext)
         {
             if (handleContext.IsInvalid)
-                throw AMSIException.FailedToInitialize;
+                throw AMSIException.FailedToInitialize();
         }
 
         internal static void CheckHandle(this AMSIHandleSession handleSession)
         {
             if (handleSession.IsInvalid)
-                throw AMSIException.FailedToInitializeSession;
+                throw AMSIException.FailedToInitializeSession();
         }
 
         internal static void CheckResult(this int amsiMethodResult, Action<int> success, Action<int> failure)

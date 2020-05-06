@@ -45,9 +45,8 @@ namespace MVsDotNetAMSIClient.DetailProviders
                             ParseRecord(engineInfos, engines, engine);
                         }
             }
-            catch (Exception e)
-            {
-            }
+            catch
+            {}
 
             return engines;
         }

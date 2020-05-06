@@ -49,6 +49,16 @@ namespace MVsDotNetAMSIClient
         /// </summary>
         public bool FileScannerSkipZipFileInspection { get; set; }
 
+        /// <summary>
+        /// If set, file scanner does not execute zip inspection for files exceeding this threshold in bytes
+        /// </summary>
+        public long? FileScannerSkipZipFileInspectionForFilesLargerThan { get; set; }
+
+        /// <summary>
+        /// If set, file scanner accepts zip archives with encrypted entries
+        /// </summary>
+        public bool FileScannerAcceptZipFileWithEncryptedEntry { get; set; }
+
         public static AMSIClientConfiguration Default
             => new AMSIClientConfiguration();
     }

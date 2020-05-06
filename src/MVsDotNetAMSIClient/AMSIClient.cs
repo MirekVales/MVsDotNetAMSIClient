@@ -44,14 +44,19 @@ namespace MVsDotNetAMSIClient
 
         AMSISession CreateSession()
         {
-            DetectionEngine = Configuration.DetectionEngine == DetectionEngine.Unknown
-                ? AVEngineDetector.DetectEngine().EngineType
-                : DetectionEngine;
+            DetermineDetectionEngine();
 
             if (DetectionEngine == DetectionEngine.Unknown && Configuration.SkipAMSIIfNoDetectionEngineFound)
                 throw AMSIException.NoDetectionEngineFound;
 
             return new AMSISession(this);
+        }
+
+        void DetermineDetectionEngine()
+        {
+            DetectionEngine = Configuration.DetectionEngine == DetectionEngine.Unknown
+                ? AVEngineDetector.DetectEngine().EngineType
+                : DetectionEngine;
         }
 
         public ScanResult ScanString(string content, string contentName)
@@ -67,15 +72,37 @@ namespace MVsDotNetAMSIClient
         }
 
         public ScanResult ScanFile(string filePath)
-        {
-            using (var reader = new BlockFileScanner(
-                this, filePath, Configuration.FileScannerBlockSize, !Configuration.FileScannerSkipOverlapsScanning, !Configuration.FileScannerSkipZipFileInspection))
-                return reader.Scan();
-        }
+            => ScanFile(
+                filePath
+                , Configuration.FileScannerBlockSize
+                , !Configuration.FileScannerSkipOverlapsScanning
+                , !Configuration.FileScannerSkipZipFileInspection
+                , Configuration.FileScannerSkipZipFileInspectionForFilesLargerThan
+                , Configuration.FileScannerAcceptZipFileWithEncryptedEntry);
 
-        public ScanResult ScanFile(string filePath, int blockSize, bool scanOverlaps, bool inspectZipFiles)
+        public ScanResult ScanFile(
+            string filePath
+            , int blockSize
+            , bool scanOverlaps
+            , bool inspectZipFiles
+            , long? maxArchiveSizeInBytes
+            , bool acceptArchiveWithEncryptedEntry)
         {
-            using (var reader = new BlockFileScanner(this, filePath, blockSize, scanOverlaps, inspectZipFiles))
+            DetermineDetectionEngine();
+
+            using (var resultBuilder = new ResultBuilder(
+                new ScanContext(this, null, filePath, ContentType.File, 0, null)))
+                if (FileSignatureReader.IsFileBlocked(filePath))
+                    return resultBuilder.ToBlockedResult();
+
+            using (var reader = new BlockFileScanner(
+                this
+                , filePath
+                , blockSize
+                , scanOverlaps
+                , inspectZipFiles
+                , maxArchiveSizeInBytes
+                , acceptArchiveWithEncryptedEntry))
                 return reader.Scan();
         }
 

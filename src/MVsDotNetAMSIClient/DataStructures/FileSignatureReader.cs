@@ -22,7 +22,23 @@ namespace MVsDotNetAMSIClient.DataStructures
             yield return new FileSignature(FileType.Tar, "Tar LZW", "1F-9D", 2);
         }
 
-        internal static FileSignature GetFileSignature(string filepath)
+        internal static bool IsFileBlocked(string filepath)
+        {
+            try
+            {
+                using (var stream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read, SignatureMaxLength))
+                    return false;
+            }
+            catch(IOException e)
+            {
+                if (e.HResult == -2147024671)
+                    return true;
+
+                throw e;
+            }
+        }
+
+        public static FileSignature GetFileSignature(string filepath)
         {
             using (var stream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read, SignatureMaxLength))
             {

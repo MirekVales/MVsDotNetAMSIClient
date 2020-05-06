@@ -13,6 +13,9 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal ResultBuilder(ScanContext scanContext)
             => ScanContext = scanContext;
 
+        internal ScanResult ToBlockedResult()
+            => ToResult(-1);
+
         internal ScanResult ToResult(int detectionResultNumber)
         {
             var result = GetDetectionResult(detectionResultNumber);
@@ -70,7 +73,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         DetectionResult GetDetectionResult(int result)
         {
             if (result < 0)
-                return DetectionResult.ApplicationError;
+                return DetectionResult.FileBlocked;
             if (result == (int)AMSIResult.AMSI_RESULT_CLEAN)
                 return DetectionResult.Clean;
             if (result == (int)AMSIResult.AMSI_RESULT_NOT_DETECTED)
@@ -84,10 +87,10 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal static HashSet<DetectionResult> BreakResults = new HashSet<DetectionResult>(new [] {
                 DetectionResult.ApplicationError
                 , DetectionResult.BlockedByAdministrator
-                , DetectionResult.IdentifiedAsMalware });
+                , DetectionResult.IdentifiedAsMalware
+                , DetectionResult.FileBlocked });
 
         internal static bool IsBreakResult(DetectionResult result)
             => BreakResults.Contains(result);
-
     }
 }

@@ -34,7 +34,12 @@ namespace MVsDotNetAMSIClient
                 , content.Length * 4
                 , content.GetMD5Hash())))
             {
-                var result = AMSIMethods.AmsiScanString(client.ContextHandle, content, contentName, sessionHandle, out var resultNumber);
+                var result = AMSIMethods.AmsiScanString(
+                    client.ContextHandle
+                    , content
+                    , contentName
+                    , sessionHandle
+                    , out var resultNumber);
                 ScanResult scanResult = null;
                 result.CheckResult(
                     success: _ => scanResult = resultBuilder.ToResult(resultNumber)
@@ -54,7 +59,13 @@ namespace MVsDotNetAMSIClient
                 , buffer.LongLength
                 , buffer.GetMD5Hash())))
             {
-                var result = AMSIMethods.AmsiScanBuffer(client.ContextHandle, buffer, length, contentName, sessionHandle, out var resultNumber);
+                var result = AMSIMethods.AmsiScanBuffer(
+                    client.ContextHandle
+                    , buffer
+                    , length
+                    , contentName
+                    , sessionHandle
+                    , out var resultNumber);
                 ScanResult scanResult = null;
                 result.CheckResult(
                     success: _ => scanResult = resultBuilder.ToResult(resultNumber)

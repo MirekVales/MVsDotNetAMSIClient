@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
 using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.DataStructures.Streams;
+using System;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
@@ -13,118 +11,96 @@ namespace MVsDotNetAMSIClient.DataStructures
         readonly AMSIClient client;
         readonly BlockFileScannerContext context;
 
-        internal BlockFileScanner(AMSIClient client, string filePath, int blockSize, bool scanOverlaps, bool inspectZipFiles)
+        internal BlockFileScanner(
+            AMSIClient client
+            , string filePath
+            , int blockSize
+            , bool scanOverlaps
+            , bool inspectZipFiles
+            , long? maxArchiveSize
+            , bool acceptEncryptedArchive)
         {
             this.client = client;
-            context = new BlockFileScannerContext(filePath, blockSize, scanOverlaps, inspectZipFiles);
+            context = new BlockFileScannerContext(filePath, blockSize, scanOverlaps, inspectZipFiles, maxArchiveSize, acceptEncryptedArchive);
         }
-
-        Dictionary<FileType, Func<IEnumerable<ScanResult>>> FileProcessors => new Dictionary<FileType, Func<IEnumerable<ScanResult>>>()
-            {
-                { FileType.Unknown, ScanSeekableStream },
-                { FileType.Bzip2, ScanSeekableStream},
-                { FileType.GZip, ScanSeekableStream},
-                { FileType.Tar, ScanTarArchive},
-                { FileType.Zip, ScanZipArchive},
-            };
 
         internal ScanResult Scan()
         {
+            ScanResult breakResult = null;
             ScanResult lastResult = null;
 
-            var breakResult = FileProcessors[context.FileSignature.FileType]()
-                .FirstOrDefault(segmentResult => ResultBuilder.IsBreakResult((lastResult = segmentResult).Result));
+            if (!context.IsArchive || (context.IsArchive && !context.ExceedsMaxArchiveSize))
+            {
+                try
+                {
+                    breakResult = ScanStream(context.FileSignature.FileType)
+                        .FirstOrDefault(segmentResult => ResultBuilder.IsBreakResult((lastResult = segmentResult).Result));
+                }
+                catch (Exception e)
+                {
+                    breakResult = new ScanResult() { Result = DetectionResult.ApplicationError, ResultDetail = e.ToString() };
+                }
+            }
 
-            var isZip = context.FileSignature.FileType != FileType.Unknown;
+            if (breakResult == null && context.IsArchive)
+            {
+                breakResult = ScanStream(FileType.Unknown)
+                    .FirstOrDefault(segmentResult => ResultBuilder.IsBreakResult((lastResult = segmentResult).Result));
+            }
+
+            UpdateScanResult(lastResult);
+            
+            return breakResult ?? lastResult;
+        }
+
+        void UpdateScanResult(ScanResult lastResult)
+        {
+            if (lastResult == null)
+                return;
+
             lastResult.ContentHash = context.MD5Hash.GetAwaiter().GetResult();
             lastResult.ContentByteSize = streamLength;
             lastResult.ContentName = context.FilePath;
-            lastResult.ContentType = isZip ? ContentType.ZipFile : ContentType.File;
+            lastResult.ContentType = context.IsArchive ? ContentType.ZipFile : ContentType.File;
             lastResult.ElapsedTime = Elapsed;
-            return breakResult ?? lastResult;
         }
 
         long streamLength = 0;
 
-        IEnumerable<ScanResult> ScanZipArchive()
+        IEnumerable<ScanResult> ScanStream(FileType fileType)
         {
-            streamLength = 0;
-            var zipStream = (ZipInputStream)context.ReadStream;
-            while (zipStream.GetNextEntry() is ZipEntry zipEntry)
+            streamLength = 0L;
+            using (var stream = context.InitiateStream(fileType))
             {
                 int read;
                 do
                 {
-                    streamLength += read = context.ReadStream.Read(context.Buffer, 0, context.BlockSize);
+                    read = stream.Read(context.Buffer, context.BlockSize);
                     var scanResult = client.ScanBuffer(
                         context.Buffer
                         , (uint)context.BlockSize
-                        , $"{context.FilePath}@{context.FileStream.Position}>{zipEntry.Name}");
+                        , $"{context.FilePath}@{stream.Position - context.BlockSize}>{stream.CurrentEntryName}");
 
                     yield return scanResult;
 
                 } while (read > 0);
+                streamLength = stream.Position;
             }
-        }
-
-        IEnumerable<ScanResult> ScanTarArchive()
-        {
-            streamLength = 0;
-            var zipStream = (TarInputStream)context.ReadStream;
-            while (zipStream.GetNextEntry() is TarEntry tarEntry)
-            {
-                int read;
-                do
-                {
-                    streamLength += read = context.ReadStream.Read(context.Buffer, 0, context.BlockSize);
-                    var scanResult = client.ScanBuffer(
-                        context.Buffer
-                        , (uint)context.BlockSize
-                        , $"{context.FilePath}@{context.FileStream.Position}>{tarEntry.Name}");
-
-                    yield return scanResult;
-
-                } while (read > 0);
-            }
-        }
-
-        IEnumerable<ScanResult> ScanSeekableStream()
-        {
-            streamLength = 0;
-            int read;
-            do
-            {
-                streamLength += read = context.ReadStream.Read(context.Buffer, 0, context.BlockSize);
-
-                var scanResult = client.ScanBuffer(
-                    context.Buffer
-                    , (uint)context.BlockSize
-                    , $"{context.FilePath}@{context.FileStream.Position}");
-
-                yield return scanResult;
-
-            } while (read > 0);
 
             if (context.ScanOverlaps)
-                foreach (var overlap in context.GetOverlaps(streamLength))
-                    yield return ScanSegment(overlap);
+                using (var stream = context.InitiateStream(fileType))
+                    foreach (var overlap in context.GetOverlaps(streamLength))
+                        yield return ScanSegment(stream, overlap);
         }
 
-        ScanResult ScanSegment(long offset)
+        ScanResult ScanSegment(IInputStream stream, long offset)
         {
-            if (context.ReadStream.CanSeek)
-                context.ReadStream.Seek(offset, SeekOrigin.Begin);
-            else
-                context.ScanToPosition(offset);
-
-            context.ReadStream.Read(context.Buffer, 0, context.BlockSize);
+            stream.ScanTo(context.Buffer, offset);
+            stream.Read(context.Buffer, context.BlockSize);
             return client.ScanBuffer(context.Buffer, (uint)context.BlockSize, $"{context.FilePath}@{offset}");
         }
 
         public new void Dispose()
-        {
-            base.Dispose();
-            context?.Dispose();
-        }
+            => base.Dispose();
     }
 }

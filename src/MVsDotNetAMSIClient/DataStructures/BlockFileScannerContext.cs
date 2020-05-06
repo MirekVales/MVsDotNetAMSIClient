@@ -3,75 +3,66 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.BZip2;
+using MVsDotNetAMSIClient.DataStructures.Streams;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
-    internal class BlockFileScannerContext : IDisposable
+    internal class BlockFileScannerContext
     {
-        internal string FilePath { get; set; }
-        internal FileStream FileStream { get; set; }
-        internal Stream ReadStream { get; set; }
-        internal byte[] Buffer { get; set; }
-        internal Task<string> MD5Hash { get; set; }
-        internal int BlockSize { get; set; }
-        internal FileSignature FileSignature { get; set; }
-        internal bool ScanOverlaps { get; set; }
-        internal bool InspectZipFiles { get; set; }
+        internal string FilePath { get; }
+        internal FileInfo FileInfo { get; }
+        internal byte[] Buffer { get; }
+        internal Task<string> MD5Hash { get; }
+        internal int BlockSize { get; }
+        internal FileSignature FileSignature { get; }
+        internal bool ScanOverlaps { get; }
+        internal bool InspectZipFiles { get; }
+        internal long? MaxArchiveSize { get; }
+        internal bool AcceptEncryptedZipEntries { get; }
 
-        internal BlockFileScannerContext(string filePath, int blockSize, bool scanOverlaps, bool inspectZipFiles)
+        internal BlockFileScannerContext(
+            string filePath
+            , int blockSize
+            , bool scanOverlaps
+            , bool inspectZipFiles
+            , long? maxArchiveSize
+            , bool acceptCryptedZipEntries)
         {
             FilePath = filePath;
+            FileInfo = new FileInfo(filePath);
             BlockSize = blockSize;
             ScanOverlaps = scanOverlaps;
             InspectZipFiles = inspectZipFiles;
+            MaxArchiveSize = maxArchiveSize;
+            AcceptEncryptedZipEntries = acceptCryptedZipEntries;
 
             Buffer = new byte[blockSize];
             FileSignature = inspectZipFiles ? FileSignatureReader.GetFileSignature(filePath) : FileSignature.Unknown;
-            MD5Hash = Task.Run(() => new FileInfo(filePath).GetFileMD5Hash());
-
-            InitiateStreams();
+            MD5Hash = Task.Run(() => FileInfo.GetFileMD5Hash());
         }
 
-        internal void InitiateStreams()
-        {
-            ReadStream?.Dispose();
-            FileStream?.Dispose();
+        internal IInputStream InitiateStream(FileType fileType)
+            => InputStreamsFunc[fileType]();
 
-            FileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.Read, BlockSize, FileOptions.SequentialScan);
-            ReadStream = DecompressStreams[FileSignature.FileType](FileStream);
-        }
-
-        Dictionary<FileType, Func<FileStream, Stream>> DecompressStreams => new Dictionary<FileType, Func<FileStream, Stream>>()
+        Dictionary<FileType, Func<IInputStream>> InputStreamsFunc => new Dictionary<FileType, Func<IInputStream>>()
             {
-                { FileType.Unknown, fileStream => fileStream },
-                { FileType.Bzip2, fileStream => new BZip2InputStream(fileStream) },
-                { FileType.GZip, fileStream => new GZipInputStream(fileStream) },
-                { FileType.Tar, fileStream => new TarInputStream(fileStream) },
-                { FileType.Zip, fileStream => new ZipInputStream(fileStream) },
+                { FileType.Unknown, () => new InputStream(FilePath, BlockSize) },
+                { FileType.Bzip2, () => new InputStream(FilePath, BlockSize, fileStream => new BZip2InputStream(fileStream)) },
+                { FileType.GZip, () => new InputStream(FilePath, BlockSize, fileStream => new GZipInputStream(fileStream, BlockSize)) },
+                { FileType.Tar, () => new TarArchiveStream(FilePath, BlockSize) },
+                { FileType.Zip, () => new ZipArchiveStream(FilePath, BlockSize, !AcceptEncryptedZipEntries) },
             };
 
         internal IEnumerable<long> GetOverlaps(long streamLength)
             => Enumerable.Range(1, Math.Max(0, (int)Math.Ceiling((double)streamLength / BlockSize) - 1))
                 .Select(index => (long)index * BlockSize - BlockSize / 2);
 
-        internal void ScanToPosition(long offset)
-        {
-            var diff = offset - ReadStream.Position;
-            while (diff > 0 && (_ = ReadStream.Read(Buffer, 0, (int)Math.Min(diff, Buffer.Length))) > 0)
-                diff = offset - ReadStream.Position;
+        internal bool IsArchive
+            => new[] { FileType.Bzip2, FileType.GZip, FileType.Tar, FileType.Zip }.Contains(FileSignature.FileType);
 
-            if (ReadStream.Position != offset)
-                throw new IOException($"Failed to navigate to position {offset} in file {FilePath}");
-        }
-
-        public void Dispose()
-        {
-            ReadStream?.Dispose();
-            FileStream?.Dispose();
-        }
+        internal bool ExceedsMaxArchiveSize
+            => IsArchive && MaxArchiveSize.HasValue && MaxArchiveSize < FileInfo.Length;
     }
 }

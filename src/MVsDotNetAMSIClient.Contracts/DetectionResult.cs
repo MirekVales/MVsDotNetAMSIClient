@@ -23,6 +23,10 @@
         /// </summary>
         IdentifiedAsMalware,
         /// <summary>
+        /// File was blocked before scan begun
+        /// </summary>
+        FileBlocked,
+        /// <summary>
         /// Scan could not be executed. There was failure when calling AMSI, probably related to AV engine
         /// </summary>
         ApplicationError
