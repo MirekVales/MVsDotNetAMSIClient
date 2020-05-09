@@ -9,6 +9,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal AMSIHandleSession SessionHandle { get; }
         internal string ContentName { get; }
         internal ContentType ContentType { get; }
+        internal FileType ContentFileType { get; }
         internal long Size { get; }
         internal string Hash { get; }
 
@@ -17,6 +18,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             , AMSIHandleSession sessionHandle
             , string contentName
             , ContentType contentType
+            , FileType contentFileType
             , long size
             , string hash)
         {
@@ -24,6 +26,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             SessionHandle = sessionHandle;
             ContentName = contentName;
             ContentType = contentType;
+            ContentFileType = contentFileType;
             Size = size;
             Hash = hash;
         }

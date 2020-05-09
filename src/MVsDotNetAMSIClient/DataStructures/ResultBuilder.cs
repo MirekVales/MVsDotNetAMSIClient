@@ -13,7 +13,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal ResultBuilder(ScanContext scanContext)
             => ScanContext = scanContext;
 
-        internal ScanResult ToBlockedResult()
+        internal ScanResult ToResultBlocked()
             => ToResult(-1);
 
         internal ScanResult ToResult(int detectionResultNumber)
@@ -31,9 +31,10 @@ namespace MVsDotNetAMSIClient.DataStructures
                 ContentName = ScanContext.ContentName,
                 ContentType = ScanContext.ContentType,
                 ContentByteSize = ScanContext.Size,
+                ContentFileType = ScanContext.ContentFileType,
                 ContentHash = ScanContext.Hash,
 
-                MalwareId = detectionResultNumber,
+                MalwareID = GetMalwareID(detectionResultNumber),
                 ThreatLevel = Math.Min(1, (float)Math.Round(detectionResultNumber / 32768d, 2)),
                 Result = result,
                 ResultDetail = null,
@@ -48,6 +49,31 @@ namespace MVsDotNetAMSIClient.DataStructures
             };
         }
 
+        internal ScanResult ToResultRejected(string reason)
+            => new ScanResult()
+            {
+                TimeStamp = Start,
+
+                ContentName = ScanContext.ContentName,
+                ContentType = ScanContext.ContentType,
+                ContentByteSize = ScanContext.Size,
+                ContentFileType = ScanContext.ContentFileType,
+                ContentHash = ScanContext.Hash,
+
+                MalwareID = null,
+                ThreatLevel = null,
+                Result = DetectionResult.Rejected,
+                ResultDetail = reason,
+
+                ScanProcessAppName = ScanContext.Client.Name,
+                ScanEnvironmentMachineName = Environment.MachineName,
+                ScanUsername = Environment.UserDomainName,
+                DetectionEngine = ScanContext.Client.DetectionEngine,
+                ElapsedTime = Elapsed,
+
+                EngineResultDetail = null
+            };
+
         internal ScanResult ToResult(Exception exception)
             => new ScanResult()
             {
@@ -56,9 +82,10 @@ namespace MVsDotNetAMSIClient.DataStructures
                 ContentName = ScanContext.ContentName,
                 ContentType = ScanContext.ContentType,
                 ContentByteSize = ScanContext.Size,
+                ContentFileType = ScanContext.ContentFileType,
                 ContentHash = ScanContext.Hash,
 
-                MalwareId = null,
+                MalwareID = null,
                 ThreatLevel = null,
                 Result = DetectionResult.ApplicationError,
                 ResultDetail = exception.ToString(),
@@ -83,6 +110,9 @@ namespace MVsDotNetAMSIClient.DataStructures
 
             return DetectionResult.BlockedByAdministrator;
         }
+
+        int? GetMalwareID(int detectionResultID)
+            => detectionResultID > (int)AMSIResult.AMSI_RESULT_NOT_DETECTED ? detectionResultID : (int?)null;
 
         internal static HashSet<DetectionResult> BreakResults = new HashSet<DetectionResult>(new [] {
                 DetectionResult.ApplicationError

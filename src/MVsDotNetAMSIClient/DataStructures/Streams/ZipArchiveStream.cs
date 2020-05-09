@@ -5,14 +5,14 @@ namespace MVsDotNetAMSIClient.DataStructures.Streams
     internal class ZipArchiveStream : BaseInputStream<ZipInputStream>
     {
         ZipEntry zipEntry;
-        readonly bool throwOnCryptedEntries;
+        readonly bool throwOnEncryptedEntries;
 
         public override string CurrentEntryName => zipEntry?.Name;
 
-        internal ZipArchiveStream(string filePath, int blockSize, bool throwOnEnryptedEntries)
+        internal ZipArchiveStream(string filePath, int blockSize, bool throwOnEncryptedEntries)
             : base(filePath, blockSize)
         {
-            this.throwOnCryptedEntries = throwOnEnryptedEntries;
+            this.throwOnEncryptedEntries = throwOnEncryptedEntries;
             ReadStream = new ZipInputStream(fileStream, blockSize);
             MoveToNextEntry();
         }
@@ -24,7 +24,7 @@ namespace MVsDotNetAMSIClient.DataStructures.Streams
                 if ((zipEntry = ReadStream.GetNextEntry()) == null)
                     return false;
 
-                if (throwOnCryptedEntries && zipEntry.IsCrypted)
+                if (throwOnEncryptedEntries && zipEntry.IsCrypted)
                     throw AMSIException.ZipContainsCryptedEntry(zipEntry.Name);
             }
             while (!zipEntry.IsFile);

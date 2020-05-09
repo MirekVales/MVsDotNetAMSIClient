@@ -72,37 +72,19 @@ namespace MVsDotNetAMSIClient
         }
 
         public ScanResult ScanFile(string filePath)
-            => ScanFile(
-                filePath
-                , Configuration.FileScannerBlockSize
-                , !Configuration.FileScannerSkipOverlapsScanning
-                , !Configuration.FileScannerSkipZipFileInspection
-                , Configuration.FileScannerSkipZipFileInspectionForFilesLargerThan
-                , Configuration.FileScannerAcceptZipFileWithEncryptedEntry);
-
-        public ScanResult ScanFile(
-            string filePath
-            , int blockSize
-            , bool scanOverlaps
-            , bool inspectZipFiles
-            , long? maxArchiveSizeInBytes
-            , bool acceptArchiveWithEncryptedEntry)
         {
             DetermineDetectionEngine();
 
             using (var resultBuilder = new ResultBuilder(
-                new ScanContext(this, null, filePath, ContentType.File, 0, null)))
-                if (FileSignatureReader.IsFileBlocked(filePath))
-                    return resultBuilder.ToBlockedResult();
+                new ScanContext(this, null, filePath, ContentType.File, FileType.Unknown, 0, null)))
+                if (new FileSignatureReader().IsFileBlocked(filePath))
+                    return resultBuilder.ToResultBlocked();
 
-            using (var reader = new BlockFileScanner(
+            using (var reader = new FileStreamScannerSession(
                 this
                 , filePath
-                , blockSize
-                , scanOverlaps
-                , inspectZipFiles
-                , maxArchiveSizeInBytes
-                , acceptArchiveWithEncryptedEntry))
+                , Configuration.FileScannerBlockSize
+                , Configuration.FileScannerAcceptZipFileWithEncryptedEntry))
                 return reader.Scan();
         }
 

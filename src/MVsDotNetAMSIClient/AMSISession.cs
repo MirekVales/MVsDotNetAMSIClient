@@ -31,6 +31,7 @@ namespace MVsDotNetAMSIClient
                 , sessionHandle
                 , contentName
                 , ContentType.String
+                , FileType.Unknown
                 , content.Length * 4
                 , content.GetMD5Hash())))
             {
@@ -56,6 +57,7 @@ namespace MVsDotNetAMSIClient
                 , sessionHandle
                 , contentName
                 , ContentType.ByteArray
+                , FileType.Unknown
                 , buffer.LongLength
                 , buffer.GetMD5Hash())))
             {

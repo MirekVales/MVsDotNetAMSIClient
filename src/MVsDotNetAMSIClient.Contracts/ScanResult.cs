@@ -22,6 +22,10 @@ namespace MVsDotNetAMSIClient.Contracts
         /// </summary>
         public ContentType ContentType { get; set; }
         /// <summary>
+        /// Type of scanned content according to detected file signature
+        /// </summary>
+        public FileType ContentFileType { get; set; }
+        /// <summary>
         /// MD5 hash of scanned content
         /// </summary>
         public string ContentHash { get; set; }
@@ -33,7 +37,7 @@ namespace MVsDotNetAMSIClient.Contracts
         /// <summary>
         /// Id or family id of malware detected
         /// </summary>
-        public int? MalwareId { get; set; }
+        public int? MalwareID { get; set; }
         /// <summary>
         /// Normalized level of threat (0 - no threat, 1 max threat)
         /// </summary>

@@ -17,10 +17,6 @@
         /// <summary>
         /// Scanned content is file
         /// </summary>
-        File,
-        /// <summary>
-        /// Compressed file
-        /// </summary>
-        ZipFile
+        File
     }
 }

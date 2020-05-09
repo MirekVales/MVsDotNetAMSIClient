@@ -62,5 +62,12 @@ namespace MVsDotNetAMSIClient.DataStructures
                     .ComputeHash(stream)
                     .Select(@byte => @byte.ToString("x2")));
         }
+
+        internal static string BytesToString(this long? size)
+            => (new (string name, int index)[] { ("B", 0), ("KB", 1), ("MB", 2), ("GB", 3), ("TB", 4) })
+                .Where(value => size >= Math.Pow(1000, value.index))
+                .Select(value => $"{Math.Round(size.Value / Math.Pow(1000, value.index), 2)} {value.name}")
+                .DefaultIfEmpty("")
+                .LastOrDefault();
     }
 }

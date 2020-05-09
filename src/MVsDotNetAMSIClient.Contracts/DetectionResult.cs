@@ -27,6 +27,10 @@
         /// </summary>
         FileBlocked,
         /// <summary>
+        /// File was rejected because of MVsDotNetAMSIClient policies
+        /// </summary>
+        Rejected,
+        /// <summary>
         /// Scan could not be executed. There was failure when calling AMSI, probably related to AV engine
         /// </summary>
         ApplicationError
