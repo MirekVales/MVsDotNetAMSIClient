@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.BZip2;
 using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.DetailProviders;
 using MVsDotNetAMSIClient.DataStructures.Streams;
 
 namespace MVsDotNetAMSIClient.DataStructures

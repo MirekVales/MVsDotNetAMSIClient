@@ -3,10 +3,11 @@ using System.ComponentModel;
 using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DataStructures;
+using MVsDotNetAMSIClient.DetailProviders;
 
 namespace MVsDotNetAMSIClient
 {
-    internal class AMSISession : IDisposable
+    public class AMSISession : IDisposable
     {
         readonly AMSIClient client;
         readonly AMSIHandleSession sessionHandle;
@@ -23,7 +24,7 @@ namespace MVsDotNetAMSIClient
         public void Dispose()
             => sessionHandle?.Dispose();
 
-        internal ScanResult ScanString(string content, string contentName)
+        public ScanResult ScanString(string content, string contentName)
         {
             using (var resultBuilder = new ResultBuilder(
                 new ScanContext(
@@ -49,7 +50,7 @@ namespace MVsDotNetAMSIClient
             }
         }
 
-        internal ScanResult ScanBuffer(byte[] buffer, uint length, string contentName)
+        public ScanResult ScanBuffer(byte[] buffer, uint length, string contentName)
         {
             using (var resultBuilder = new ResultBuilder(
                 new ScanContext(
@@ -74,6 +75,23 @@ namespace MVsDotNetAMSIClient
                     , failure: _ => scanResult = resultBuilder.ToResult(new Win32Exception(result)));
                 return scanResult;
             }
+        }
+
+        public ScanResult ScanFile(string filePath)
+        {
+            client.DetermineDetectionEngine();
+
+            using (var resultBuilder = new ResultBuilder(
+                new ScanContext(client, null, filePath, ContentType.File, FileType.Unknown, 0, null)))
+                if (new FileSignatureReader().IsFileBlocked(filePath))
+                    return resultBuilder.ToResultBlocked();
+
+            using (var reader = new FileStreamScannerSession(
+                client
+                , filePath
+                , client.Configuration.FileScannerBlockSize
+                , client.Configuration.FileScannerAcceptZipFileWithEncryptedEntry))
+                return reader.Scan();
         }
     }
 }

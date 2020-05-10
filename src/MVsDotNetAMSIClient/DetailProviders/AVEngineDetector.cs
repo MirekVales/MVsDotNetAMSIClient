@@ -32,7 +32,8 @@ namespace MVsDotNetAMSIClient.DetailProviders
         internal static IEnumerable<DetectionEngineInfo> ListDetectionEngines()
             => ListDetectionEngines(EngineInfos);
 
-        internal static IEnumerable<DetectionEngineInfo> ListDetectionEngines(IDictionary<Guid, (DetectionEngine DetectionEngine, Func<uint, bool> IsEnabled)> engineInfos)
+        internal static IEnumerable<DetectionEngineInfo> ListDetectionEngines(
+            IDictionary<Guid, (DetectionEngine DetectionEngine, Func<uint, bool> IsEnabled)> engineInfos)
         {
             var engines = new HashSet<DetectionEngineInfo>();
             try
@@ -89,7 +90,8 @@ namespace MVsDotNetAMSIClient.DetailProviders
             }
         }
 
-        internal static DetectionEngineInfo DetectEngine(IDictionary<Guid, (DetectionEngine DetectionEngine, Func<uint, bool> IsEnabled)> engineInfos)
+        internal static DetectionEngineInfo DetectEngine(
+            IDictionary<Guid, (DetectionEngine DetectionEngine, Func<uint, bool> IsEnabled)> engineInfos)
             => ListDetectionEngines(engineInfos)
                     .Where(engine => engine.IsEnabled)
                     .DefaultIfEmpty(DetectionEngineInfo.Empty)

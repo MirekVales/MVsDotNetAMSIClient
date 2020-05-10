@@ -39,12 +39,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         }
 
         internal static string GetMD5Hash(this string data)
-        {
-            using (var hashProvider = MD5.Create())
-                return string.Concat(hashProvider
-                    .ComputeHash(Encoding.UTF8.GetBytes(data))
-                    .Select(@byte => @byte.ToString("x2")));
-        }
+            => Encoding.UTF8.GetBytes(data).GetMD5Hash();
 
         internal static string GetMD5Hash(this byte[] data)
         {

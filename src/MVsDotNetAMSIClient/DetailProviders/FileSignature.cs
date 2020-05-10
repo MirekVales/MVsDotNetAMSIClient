@@ -1,6 +1,6 @@
 ﻿using MVsDotNetAMSIClient.Contracts;
 
-namespace MVsDotNetAMSIClient.DataStructures
+namespace MVsDotNetAMSIClient.DetailProviders
 {
     internal class FileSignature
     {

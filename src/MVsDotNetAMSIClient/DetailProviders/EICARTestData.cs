@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MVsDotNetAMSIClient.DataStructures
+namespace MVsDotNetAMSIClient.DetailProviders
 {
     internal class EICARTestData
     {

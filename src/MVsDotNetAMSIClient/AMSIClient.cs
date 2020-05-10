@@ -24,10 +24,10 @@ namespace MVsDotNetAMSIClient
         public static bool IsAvailable()
             => AMSIMethods.IsDllImportPossible();
 
-        public int ProcessId { get; }
+        public int ProcessID { get; }
         public string Name { get; }
-        public AMSIClientConfiguration Configuration { get; }
         public DetectionEngine DetectionEngine { get; private set; }
+        public AMSIClientConfiguration Configuration { get; }
 
         internal readonly AMSIHandleContext ContextHandle;
 
@@ -37,7 +37,7 @@ namespace MVsDotNetAMSIClient
             DetectionEngine = configuration.DetectionEngine;
 
             var result = AMSIMethods.AmsiInitialize(
-                Name = $"{AppDomain.CurrentDomain.FriendlyName} ({ProcessId = Process.GetCurrentProcess().Id})", out ContextHandle);
+                Name = $"{AppDomain.CurrentDomain.FriendlyName} ({ProcessID = Process.GetCurrentProcess().Id})", out ContextHandle);
             result.CheckResult(nameof(AMSIMethods.AmsiInitialize));
             ContextHandle.CheckHandle();
         }
@@ -52,7 +52,7 @@ namespace MVsDotNetAMSIClient
             return new AMSISession(this);
         }
 
-        void DetermineDetectionEngine()
+        internal void DetermineDetectionEngine()
         {
             DetectionEngine = Configuration.DetectionEngine == DetectionEngine.Unknown
                 ? AVEngineDetector.DetectEngine().EngineType
@@ -73,19 +73,8 @@ namespace MVsDotNetAMSIClient
 
         public ScanResult ScanFile(string filePath)
         {
-            DetermineDetectionEngine();
-
-            using (var resultBuilder = new ResultBuilder(
-                new ScanContext(this, null, filePath, ContentType.File, FileType.Unknown, 0, null)))
-                if (new FileSignatureReader().IsFileBlocked(filePath))
-                    return resultBuilder.ToResultBlocked();
-
-            using (var reader = new FileStreamScannerSession(
-                this
-                , filePath
-                , Configuration.FileScannerBlockSize
-                , Configuration.FileScannerAcceptZipFileWithEncryptedEntry))
-                return reader.Scan();
+            using (var session = CreateSession())
+                return session.ScanFile(filePath);
         }
 
         public ScanResult TestEICARString()

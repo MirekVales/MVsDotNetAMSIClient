@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using MVsDotNetAMSIClient.Contracts;
 
-namespace MVsDotNetAMSIClient.DataStructures
+namespace MVsDotNetAMSIClient.DetailProviders
 {
     internal class FileSignatureReader
     {
