@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="package.ico" Pack="true" PackagePath=""/>
+    <None Include="package.ico" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>

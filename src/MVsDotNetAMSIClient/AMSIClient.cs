@@ -5,6 +5,7 @@ using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DataStructures;
 using MVsDotNetAMSIClient.DetailProviders;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient
 {
@@ -42,7 +43,7 @@ namespace MVsDotNetAMSIClient
             ContextHandle.CheckHandle();
         }
 
-        AMSISession CreateSession()
+        public AMSISession CreateSession()
         {
             DetermineDetectionEngine();
 

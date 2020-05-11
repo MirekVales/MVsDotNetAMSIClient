@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MVsDotNetAMSIClient.Contracts
+namespace MVsDotNetAMSIClient.Contracts.Enums
 {
     [Flags]
     public enum FileType

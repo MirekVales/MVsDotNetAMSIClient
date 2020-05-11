@@ -1,4 +1,4 @@
-﻿namespace MVsDotNetAMSIClient.Contracts
+﻿namespace MVsDotNetAMSIClient.Contracts.Enums
 {
     /// <summary>
     /// Enumeration of recognized AV/malware engines

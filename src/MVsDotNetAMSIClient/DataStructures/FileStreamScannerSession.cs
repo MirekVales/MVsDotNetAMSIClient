@@ -36,13 +36,13 @@ namespace MVsDotNetAMSIClient.DataStructures
 
             if ((!streamScanner.IsArchive || configuration.FileScannerSkipZipFileInspection)
                 || (shouldScanAsArchive
-                && streamScanner.TryScanArchiveOrBinary(!configuration.FileScannerSkipOverlapsScanning, out lastResult, out breakingResult)))
+                && streamScanner.TryScanArchiveOrBinary(!configuration.FileScannerSkipOverlapsScan, out lastResult, out breakingResult)))
             {
-                streamScanner.TryScanBinary(!configuration.FileScannerSkipOverlapsScanning, out lastResult, out breakingResult);
+                streamScanner.TryScanBinary(!configuration.FileScannerSkipOverlapsScan, out lastResult, out breakingResult);
             }
 
             if (lastResult != null)
-                lastResult.ElapsedTime = Elapsed;
+                lastResult.DetectionResultInfo.ElapsedTime = Elapsed;
             
             return breakingResult ?? lastResult;
         }

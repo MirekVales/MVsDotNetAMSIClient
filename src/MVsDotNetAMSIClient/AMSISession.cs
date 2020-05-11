@@ -4,6 +4,7 @@ using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DataStructures;
 using MVsDotNetAMSIClient.DetailProviders;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient
 {
@@ -83,7 +84,10 @@ namespace MVsDotNetAMSIClient
 
             using (var resultBuilder = new ResultBuilder(
                 new ScanContext(client, null, filePath, ContentType.File, FileType.Unknown, 0, null)))
-                if (new FileSignatureReader().IsFileBlocked(filePath))
+            using (var signatureReader = new FileSignatureReader(filePath))
+                if (!signatureReader.FileExists())
+                    return resultBuilder.ToResult(DetectionResult.FileNotExists, $"File not found at {filePath}");
+                else if (signatureReader.IsFileBlocked())
                     return resultBuilder.ToResultBlocked();
 
             using (var reader = new FileStreamScannerSession(

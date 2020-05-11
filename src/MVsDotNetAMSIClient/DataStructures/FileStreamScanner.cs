@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.BZip2;
 using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 using MVsDotNetAMSIClient.DetailProviders;
 using MVsDotNetAMSIClient.DataStructures.Streams;
 
@@ -37,7 +38,8 @@ namespace MVsDotNetAMSIClient.DataStructures
             this.acceptEncryptedZipEntries = acceptEncryptedZipEntries;
 
             buffer = new byte[blockSize];
-            fileSignature = new FileSignatureReader().GetFileSignature(filePath);
+            using (var signatureReader = new FileSignatureReader(filePath))
+                fileSignature = signatureReader.GetFileSignature();
             md5Hash = Task.Run(() => fileInfo.GetFileMD5Hash());
         }
 
@@ -51,7 +53,7 @@ namespace MVsDotNetAMSIClient.DataStructures
                 , fileSignature.FileType
                 , fileInfo.Length
                 , null)))
-                return builder.ToResultRejected(reason);
+                return builder.ToResult(DetectionResult.FileRejected, reason);
         }
 
         internal IInputStream InitiateStream(FileType fileType)
@@ -111,11 +113,11 @@ namespace MVsDotNetAMSIClient.DataStructures
 
             if (anyResult != null)
             {
-                anyResult.ContentByteSize = streamLength;
-                anyResult.ContentHash = md5Hash.GetAwaiter().GetResult();
-                anyResult.ContentName = filePath;
-                anyResult.ContentType = ContentType.File;
-                anyResult.ContentFileType = fileSignature.FileType;
+                anyResult.ContentInfo.ContentByteSize = streamLength;
+                anyResult.ContentInfo.ContentHash = md5Hash.GetAwaiter().GetResult();
+                anyResult.ContentInfo.ContentName = filePath;
+                anyResult.ContentInfo.ContentType = ContentType.File;
+                anyResult.ContentInfo.ContentFileType = fileSignature.FileType;
             }
 
             lastResult = anyResult;

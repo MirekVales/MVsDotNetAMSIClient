@@ -1,5 +1,5 @@
 ﻿using System;
-using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient
 {
@@ -34,7 +34,7 @@ namespace MVsDotNetAMSIClient
 
         /// <summary>
         /// If file is to be scanned, it is first split into byte array chunks that are sent to AMSI
-        /// To improve detection efficiency, overlap scanning feature can be enabled
+        /// To improve detection efficiency, overlap scan feature can be enabled
         /// Default value of chunks size is 10 MB
         /// </summary>
         public int FileScannerBlockSize { get; set; } = 10 * 1000 * 1000;
@@ -44,7 +44,7 @@ namespace MVsDotNetAMSIClient
         /// additional scan of segment that is created by taking last half of previous chunk
         /// and first half of next chunk. This costs additional time but increases detection effectivity
         /// </summary>
-        public bool FileScannerSkipOverlapsScanning { get; set; }
+        public bool FileScannerSkipOverlapsScan { get; set; }
 
         /// <summary>
         /// If set, file scanner rejects to scan file exceeding this size threshold in bytes

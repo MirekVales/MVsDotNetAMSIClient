@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.DetailProviders
 {

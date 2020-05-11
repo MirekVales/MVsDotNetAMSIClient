@@ -1,4 +1,5 @@
 ﻿using System;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.Contracts
 {
@@ -10,68 +11,29 @@ namespace MVsDotNetAMSIClient.Contracts
         public DateTime TimeStamp { get; set; }
 
         /// <summary>
-        /// Name of scanned content provided by initiator
+        /// Details about content provided as input
         /// </summary>
-        public string ContentName { get; set; }
-        /// <summary>
-        /// Byte size of scanned content
-        /// </summary>
-        public long ContentByteSize { get; set; }
-        /// <summary>
-        /// Type of scanned content
-        /// </summary>
-        public ContentType ContentType { get; set; }
-        /// <summary>
-        /// Type of scanned content according to detected file signature
-        /// </summary>
-        public FileType ContentFileType { get; set; }
-        /// <summary>
-        /// MD5 hash of scanned content
-        /// </summary>
-        public string ContentHash { get; set; }
+        public ScanResultContentInfo ContentInfo { get; set; }
 
         /// <summary>
-        /// Overall result of scanning action
+        /// Details about detection engine involved in scan
+        /// </summary>
+        public ScanResultEngineInfo DetectionEngineInfo { get; set; }
+
+        /// <summary>
+        /// Overall result of detection
         /// </summary>
         public DetectionResult Result { get; set; }
+
         /// <summary>
-        /// Id or family id of malware detected
-        /// </summary>
-        public int? MalwareID { get; set; }
-        /// <summary>
-        /// Normalized level of threat (0 - no threat, 1 max threat)
-        /// </summary>
-        public float? ThreatLevel { get; set; }
-        /// <summary>
-        /// Extra information about scanning action
+        /// Overall extra information about detection result
         /// </summary>
         public string ResultDetail { get; set; }
 
         /// <summary>
-        /// Name of AMSI client application 
+        /// Details about detection result
         /// </summary>
-        public string ScanProcessAppName { get; set; }
-        /// <summary>
-        /// AV/malware engine invoked over AMSI
-        /// </summary>
-        public DetectionEngine DetectionEngine { get; set; }
-        /// <summary>
-        /// Machine name of environment where scanning action is executed
-        /// </summary>
-        public string ScanEnvironmentMachineName { get; set; }
-        /// <summary>
-        /// Name of user that executed scanning action
-        /// </summary>
-        public string ScanUsername { get; set; }
-        /// <summary>
-        /// Time spent on scanning action
-        /// </summary>
-        public TimeSpan ElapsedTime { get; set; }
-        
-        /// <summary>
-        /// In case of detected malware and supported detection engine,
-        /// this detail contains additional information about malware
-        /// </summary>
-        public IScanResultDetail EngineResultDetail { get; set; }
+        public ScanResultDetectionInfo DetectionResultInfo { get; set; }
+
     }
 }

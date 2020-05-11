@@ -1,4 +1,4 @@
-﻿namespace MVsDotNetAMSIClient.Contracts
+﻿namespace MVsDotNetAMSIClient.Contracts.Enums
 {
     public enum ContentType
     {

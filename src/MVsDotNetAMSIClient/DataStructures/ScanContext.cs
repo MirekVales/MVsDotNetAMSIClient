@@ -1,5 +1,6 @@
 ﻿using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {

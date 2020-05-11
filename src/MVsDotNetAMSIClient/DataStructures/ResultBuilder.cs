@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DetailProviders;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
@@ -27,74 +28,91 @@ namespace MVsDotNetAMSIClient.DataStructures
             return new ScanResult()
             {
                 TimeStamp = Start,
-
-                ContentName = ScanContext.ContentName,
-                ContentType = ScanContext.ContentType,
-                ContentByteSize = ScanContext.Size,
-                ContentFileType = ScanContext.ContentFileType,
-                ContentHash = ScanContext.Hash,
-
-                MalwareID = GetMalwareID(detectionResultNumber),
-                ThreatLevel = Math.Min(1, (float)Math.Round(detectionResultNumber / 32768d, 2)),
+                ContentInfo = new ScanResultContentInfo()
+                {
+                    ContentName = ScanContext.ContentName,
+                    ContentType = ScanContext.ContentType,
+                    ContentByteSize = ScanContext.Size,
+                    ContentFileType = ScanContext.ContentFileType,
+                    ContentHash = ScanContext.Hash,
+                },
+                DetectionResultInfo = new ScanResultDetectionInfo()
+                {
+                    MalwareID = GetMalwareID(detectionResultNumber),
+                    ThreatLevel = Math.Min(1, (float)Math.Round(detectionResultNumber / 32768d, 2)),
+                    EngineResultDetail = detail,
+                    ElapsedTime = Elapsed,
+                },
                 Result = result,
                 ResultDetail = null,
-
-                ScanProcessAppName = ScanContext.Client.Name,
-                ScanEnvironmentMachineName = Environment.MachineName,
-                ScanUsername = Environment.UserDomainName,
-                DetectionEngine = ScanContext.Client.DetectionEngine,
-                ElapsedTime = Elapsed,
-
-                EngineResultDetail = detail
+                DetectionEngineInfo = new ScanResultEngineInfo()
+                {
+                    ClientProcessAppName = ScanContext.Client.Name,
+                    EnvironmentMachineName = Environment.MachineName,
+                    ClientProcessUsername = Environment.UserDomainName,
+                    DetectionEngine = ScanContext.Client.DetectionEngine,
+                }
             };
         }
 
-        internal ScanResult ToResultRejected(string reason)
+        internal ScanResult ToResult(DetectionResult result, string reason)
             => new ScanResult()
             {
                 TimeStamp = Start,
-
-                ContentName = ScanContext.ContentName,
-                ContentType = ScanContext.ContentType,
-                ContentByteSize = ScanContext.Size,
-                ContentFileType = ScanContext.ContentFileType,
-                ContentHash = ScanContext.Hash,
-
-                MalwareID = null,
-                ThreatLevel = null,
-                Result = DetectionResult.Rejected,
+                ContentInfo = new ScanResultContentInfo()
+                {
+                    ContentName = ScanContext.ContentName,
+                    ContentType = ScanContext.ContentType,
+                    ContentByteSize = ScanContext.Size,
+                    ContentFileType = ScanContext.ContentFileType,
+                    ContentHash = ScanContext.Hash,
+                },
+                Result = result,
                 ResultDetail = reason,
-
-                ScanProcessAppName = ScanContext.Client.Name,
-                ScanEnvironmentMachineName = Environment.MachineName,
-                ScanUsername = Environment.UserDomainName,
-                DetectionEngine = ScanContext.Client.DetectionEngine,
-                ElapsedTime = Elapsed,
-
-                EngineResultDetail = null
+                DetectionResultInfo = new ScanResultDetectionInfo()
+                {
+                    MalwareID = null,
+                    ThreatLevel = null,
+                    EngineResultDetail = null,
+                    ElapsedTime = Elapsed,
+                },
+                DetectionEngineInfo = new ScanResultEngineInfo()
+                {
+                    ClientProcessAppName = ScanContext.Client.Name,
+                    EnvironmentMachineName = Environment.MachineName,
+                    ClientProcessUsername = Environment.UserDomainName,
+                    DetectionEngine = ScanContext.Client.DetectionEngine,
+                }
             };
 
         internal ScanResult ToResult(Exception exception)
             => new ScanResult()
             {
                 TimeStamp = Start,
-
-                ContentName = ScanContext.ContentName,
-                ContentType = ScanContext.ContentType,
-                ContentByteSize = ScanContext.Size,
-                ContentFileType = ScanContext.ContentFileType,
-                ContentHash = ScanContext.Hash,
-
-                MalwareID = null,
-                ThreatLevel = null,
+                ContentInfo = new ScanResultContentInfo()
+                {
+                    ContentName = ScanContext.ContentName,
+                    ContentType = ScanContext.ContentType,
+                    ContentByteSize = ScanContext.Size,
+                    ContentFileType = ScanContext.ContentFileType,
+                    ContentHash = ScanContext.Hash,
+                },
                 Result = DetectionResult.ApplicationError,
                 ResultDetail = exception.ToString(),
-
-                ScanProcessAppName = ScanContext.Client.Name,
-                ScanEnvironmentMachineName = Environment.MachineName,
-                ScanUsername = Environment.UserDomainName,
-                DetectionEngine = ScanContext.Client.DetectionEngine,
-                ElapsedTime = Elapsed
+                DetectionResultInfo = new ScanResultDetectionInfo()
+                {
+                    MalwareID = null,
+                    ThreatLevel = null,
+                    EngineResultDetail = null,
+                    ElapsedTime = Elapsed,
+                },
+                DetectionEngineInfo = new ScanResultEngineInfo()
+                {
+                    ClientProcessAppName = ScanContext.Client.Name,
+                    EnvironmentMachineName = Environment.MachineName,
+                    ClientProcessUsername = Environment.UserDomainName,
+                    DetectionEngine = ScanContext.Client.DetectionEngine,
+                }
             };
 
         DetectionResult GetDetectionResult(int result)
@@ -114,7 +132,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         int? GetMalwareID(int detectionResultID)
             => detectionResultID > (int)AMSIResult.AMSI_RESULT_NOT_DETECTED ? detectionResultID : (int?)null;
 
-        internal static HashSet<DetectionResult> BreakResults = new HashSet<DetectionResult>(new [] {
+        internal static HashSet<DetectionResult> BreakResults = new HashSet<DetectionResult>(new[] {
                 DetectionResult.ApplicationError
                 , DetectionResult.BlockedByAdministrator
                 , DetectionResult.IdentifiedAsMalware

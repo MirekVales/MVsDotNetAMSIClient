@@ -2,11 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.DetailProviders
 {
-    internal class FileSignatureReader
+    internal class FileSignatureReader : IDisposable
     {
         internal static IEnumerable<FileSignature> Signatures()
         {
@@ -27,21 +27,31 @@ namespace MVsDotNetAMSIClient.DetailProviders
             yield return new FileSignature(FileType.Executable, "Executable", "5A-4D", 2);
         }
 
+        readonly FileInfo fileInfo;
         readonly int signatureMaxLength;
 
-        public FileSignatureReader()
+        public FileSignatureReader(string filePath)
         {
+            fileInfo = new FileInfo(filePath);
             signatureMaxLength = Signatures()
-            .Select(signature => signature.Length)
-            .DefaultIfEmpty(0)
-            .Max();
+                .Select(signature => signature.Length)
+                .DefaultIfEmpty(0)
+                .Max();
         }
 
-        internal bool IsFileBlocked(string filepath)
+        internal bool FileExists()
+           => fileInfo.Exists;
+
+        internal bool IsFileBlocked()
         {
             try
             {
-                using (var stream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read, signatureMaxLength))
+                using (var stream = new FileStream(
+                    fileInfo.FullName
+                    , FileMode.Open
+                    , FileAccess.Read
+                    , FileShare.Read
+                    , signatureMaxLength))
                     return false;
             }
             catch(IOException e)
@@ -53,12 +63,12 @@ namespace MVsDotNetAMSIClient.DetailProviders
             }
         }
 
-        internal FileSignature GetFileSignature(string filepath)
+        internal FileSignature GetFileSignature()
         {
             if (signatureMaxLength == 0)
                 return FileSignature.Unknown;
 
-            using (var stream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read, signatureMaxLength))
+            using (var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, signatureMaxLength))
             {
                 var buffer = new byte[signatureMaxLength];
                 stream.Read(buffer, 0, signatureMaxLength);
@@ -79,6 +89,10 @@ namespace MVsDotNetAMSIClient.DetailProviders
             Array.Copy(bytes, sameLengthBytes, signature.Length);
 
             return BitConverter.ToString(sameLengthBytes) == signature.Bytes;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

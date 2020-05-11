@@ -1,4 +1,5 @@
 ﻿using System;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.Contracts
 {

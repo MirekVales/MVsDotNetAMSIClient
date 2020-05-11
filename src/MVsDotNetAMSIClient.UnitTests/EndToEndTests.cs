@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.UnitTests
 {

@@ -1,4 +1,4 @@
-﻿namespace MVsDotNetAMSIClient.Contracts
+﻿namespace MVsDotNetAMSIClient.Contracts.Enums
 {
     public enum DetectionResult
     {
@@ -23,13 +23,17 @@
         /// </summary>
         IdentifiedAsMalware,
         /// <summary>
-        /// File was blocked before scan begun
+        /// File access was blocked by AV engine before scan begun
         /// </summary>
         FileBlocked,
         /// <summary>
         /// File was rejected because of MVsDotNetAMSIClient policies
         /// </summary>
-        Rejected,
+        FileRejected,
+        /// <summary>
+        /// File was not found at given path
+        /// </summary>
+        FileNotExists,
         /// <summary>
         /// Scan could not be executed. There was failure when calling AMSI, probably related to AV engine
         /// </summary>

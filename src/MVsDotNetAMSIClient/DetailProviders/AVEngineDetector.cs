@@ -3,6 +3,7 @@ using System.Linq;
 using System.Management;
 using System.Collections.Generic;
 using MVsDotNetAMSIClient.Contracts;
+using MVsDotNetAMSIClient.Contracts.Enums;
 
 namespace MVsDotNetAMSIClient.DetailProviders
 {
