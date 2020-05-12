@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using ICSharpCode.SharpZipLib.GZip;
@@ -12,13 +13,14 @@ using MVsDotNetAMSIClient.DataStructures.Streams;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
-    internal class FileStreamScanner
+    internal class FileStreamScanner : IDisposable
     {
         readonly AMSIClient client;
         readonly string filePath;
         readonly FileInfo fileInfo;
         readonly byte[] buffer;
         readonly int blockSize;
+        readonly CancellationTokenSource cancellationTokenSource;
         readonly Task<string> md5Hash;
         readonly FileSignature fileSignature;
         readonly bool acceptEncryptedZipEntries;
@@ -38,9 +40,10 @@ namespace MVsDotNetAMSIClient.DataStructures
             this.acceptEncryptedZipEntries = acceptEncryptedZipEntries;
 
             buffer = new byte[blockSize];
+            cancellationTokenSource = new CancellationTokenSource();
             using (var signatureReader = new FileSignatureReader(filePath))
                 fileSignature = signatureReader.GetFileSignature();
-            md5Hash = Task.Run(() => fileInfo.GetFileMD5Hash());
+            md5Hash = Task.Run(() => fileInfo.GetFileMD5Hash(), cancellationTokenSource.Token);
         }
 
         internal ScanResult GetRejectedResult(string reason)
@@ -101,12 +104,19 @@ namespace MVsDotNetAMSIClient.DataStructures
                 breakingResult = ScanStream(fileType, scanOverlaps)
                         .FirstOrDefault(segmentResult => ResultBuilder.IsBreakResult((anyResult = segmentResult).Result));
             }
+            catch(AMSIRejectedByPolicyException e)
+            {
+                breakingResult = new ScanResult()
+                {
+                    Result = DetectionResult.FileRejected,
+                    ResultDetail = e.Message
+                };
+            }
             catch (Exception e)
             {
                 breakingResult = new ScanResult()
                 {
-                    Result = DetectionResult.ApplicationError
-                    ,
+                    Result = DetectionResult.ApplicationError,
                     ResultDetail = e.ToString()
                 };
             }
@@ -157,6 +167,12 @@ namespace MVsDotNetAMSIClient.DataStructures
             stream.ScanTo(buffer, offset);
             stream.Read(buffer, blockSize);
             return client.ScanBuffer(buffer, (uint)blockSize, $"{filePath}@{offset}");
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource?.Dispose();
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using MVsDotNetAMSIClient.Contracts;
+﻿using System;
+using MVsDotNetAMSIClient.Contracts;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
-    internal class FileStreamScannerSession : BlockStopwatch
+    internal class FileStreamScannerSession : BlockStopwatch, IDisposable
     {
         readonly FileStreamScanner streamScanner;
         readonly AMSIClientConfiguration configuration;
@@ -48,6 +49,9 @@ namespace MVsDotNetAMSIClient.DataStructures
         }
 
         public new void Dispose()
-            => base.Dispose();
+        {
+            streamScanner?.Dispose();
+            base.Dispose();
+        }
     }
 }

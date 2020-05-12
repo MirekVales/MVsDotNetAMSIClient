@@ -25,7 +25,7 @@ namespace MVsDotNetAMSIClient.DataStructures.Streams
                     return false;
 
                 if (throwOnEncryptedEntries && zipEntry.IsCrypted)
-                    throw AMSIException.ZipContainsCryptedEntry(zipEntry.Name);
+                    throw AMSIRejectedByPolicyException.ZipContainsCryptedEntry(zipEntry.Name);
             }
             while (!zipEntry.IsFile);
 
