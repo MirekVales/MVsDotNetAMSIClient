@@ -33,6 +33,6 @@ namespace MVsDotNetAMSIClient
             => new AMSIException("AMSI failed to initialize session");
 
         public static AMSIException ZipContainsCryptedEntry(string entryName)
-            => new AMSIException($"Zip archive contains encrypted entry {entryName}. AMSI call cannot be executed");
+            => new AMSIException($"Zip archive contains encrypted entry {entryName}. AMSI call was stopped by policy");
     }
 }

@@ -5,6 +5,14 @@ namespace MVsDotNetAMSIClient.Contracts
     public class ScanResultEngineInfo
     {
         /// <summary>
+        /// Name of AMSI client application 
+        /// </summary>
+        public string ClientProcessAppName { get; set; }
+        /// <summary>
+        /// Name of user that executed scan action
+        /// </summary>
+        public string ClientProcessUsername { get; set; }
+        /// <summary>
         /// AV/malware engine invoked over AMSI
         /// </summary>
         public DetectionEngine DetectionEngine { get; set; }
@@ -13,12 +21,8 @@ namespace MVsDotNetAMSIClient.Contracts
         /// </summary>
         public string EnvironmentMachineName { get; set; }
         /// <summary>
-        /// Name of AMSI client application 
+        /// Description of operating system on which client is executed
         /// </summary>
-        public string ClientProcessAppName { get; set; }
-        /// <summary>
-        /// Name of user that executed scan action
-        /// </summary>
-        public string ClientProcessUsername { get; set; }
+        public string EnvironmentOSDescription { get; set; }
     }
 }

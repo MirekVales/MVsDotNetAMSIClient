@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MVsDotNetAMSIClient.Contracts;
+using System.Runtime.InteropServices;
 using MVsDotNetAMSIClient.NativeMethods;
 using MVsDotNetAMSIClient.DetailProviders;
 using MVsDotNetAMSIClient.Contracts.Enums;
@@ -28,14 +29,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             return new ScanResult()
             {
                 TimeStamp = Start,
-                ContentInfo = new ScanResultContentInfo()
-                {
-                    ContentName = ScanContext.ContentName,
-                    ContentType = ScanContext.ContentType,
-                    ContentByteSize = ScanContext.Size,
-                    ContentFileType = ScanContext.ContentFileType,
-                    ContentHash = ScanContext.Hash,
-                },
+                ContentInfo = CreateContentInfo(),
                 DetectionResultInfo = new ScanResultDetectionInfo()
                 {
                     MalwareID = GetMalwareID(detectionResultNumber),
@@ -45,13 +39,7 @@ namespace MVsDotNetAMSIClient.DataStructures
                 },
                 Result = result,
                 ResultDetail = null,
-                DetectionEngineInfo = new ScanResultEngineInfo()
-                {
-                    ClientProcessAppName = ScanContext.Client.Name,
-                    EnvironmentMachineName = Environment.MachineName,
-                    ClientProcessUsername = Environment.UserDomainName,
-                    DetectionEngine = ScanContext.Client.DetectionEngine,
-                }
+                DetectionEngineInfo = CreateDetectionEngineInfo()
             };
         }
 
@@ -59,14 +47,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             => new ScanResult()
             {
                 TimeStamp = Start,
-                ContentInfo = new ScanResultContentInfo()
-                {
-                    ContentName = ScanContext.ContentName,
-                    ContentType = ScanContext.ContentType,
-                    ContentByteSize = ScanContext.Size,
-                    ContentFileType = ScanContext.ContentFileType,
-                    ContentHash = ScanContext.Hash,
-                },
+                ContentInfo = CreateContentInfo(),
                 Result = result,
                 ResultDetail = reason,
                 DetectionResultInfo = new ScanResultDetectionInfo()
@@ -76,27 +57,14 @@ namespace MVsDotNetAMSIClient.DataStructures
                     EngineResultDetail = null,
                     ElapsedTime = Elapsed,
                 },
-                DetectionEngineInfo = new ScanResultEngineInfo()
-                {
-                    ClientProcessAppName = ScanContext.Client.Name,
-                    EnvironmentMachineName = Environment.MachineName,
-                    ClientProcessUsername = Environment.UserDomainName,
-                    DetectionEngine = ScanContext.Client.DetectionEngine,
-                }
+                DetectionEngineInfo = CreateDetectionEngineInfo()
             };
 
         internal ScanResult ToResult(Exception exception)
             => new ScanResult()
             {
                 TimeStamp = Start,
-                ContentInfo = new ScanResultContentInfo()
-                {
-                    ContentName = ScanContext.ContentName,
-                    ContentType = ScanContext.ContentType,
-                    ContentByteSize = ScanContext.Size,
-                    ContentFileType = ScanContext.ContentFileType,
-                    ContentHash = ScanContext.Hash,
-                },
+                ContentInfo = CreateContentInfo(),
                 Result = DetectionResult.ApplicationError,
                 ResultDetail = exception.ToString(),
                 DetectionResultInfo = new ScanResultDetectionInfo()
@@ -106,13 +74,7 @@ namespace MVsDotNetAMSIClient.DataStructures
                     EngineResultDetail = null,
                     ElapsedTime = Elapsed,
                 },
-                DetectionEngineInfo = new ScanResultEngineInfo()
-                {
-                    ClientProcessAppName = ScanContext.Client.Name,
-                    EnvironmentMachineName = Environment.MachineName,
-                    ClientProcessUsername = Environment.UserDomainName,
-                    DetectionEngine = ScanContext.Client.DetectionEngine,
-                }
+                DetectionEngineInfo = CreateDetectionEngineInfo()
             };
 
         DetectionResult GetDetectionResult(int result)
@@ -140,5 +102,25 @@ namespace MVsDotNetAMSIClient.DataStructures
 
         internal static bool IsBreakResult(DetectionResult result)
             => BreakResults.Contains(result);
+
+        ScanResultContentInfo CreateContentInfo()
+           => new ScanResultContentInfo()
+           {
+               ContentName = ScanContext.ContentName,
+               ContentType = ScanContext.ContentType,
+               ContentByteSize = ScanContext.Size,
+               ContentFileType = ScanContext.ContentFileType,
+               ContentHash = ScanContext.Hash,
+           };
+
+        ScanResultEngineInfo CreateDetectionEngineInfo()
+            => new ScanResultEngineInfo()
+            {
+                ClientProcessAppName = ScanContext.Client.Name,
+                ClientProcessUsername = Environment.UserDomainName,
+                EnvironmentMachineName = Environment.MachineName,
+                EnvironmentOSDescription = RuntimeInformation.OSDescription,
+                DetectionEngine = ScanContext.Client.DetectionEngine,
+            };
     }
 }
