@@ -54,14 +54,17 @@ namespace MVsDotNetAMSIClient.DetailProviders
                     , signatureMaxLength))
                     return false;
             }
-            catch(IOException e)
+            catch (SystemException e)
             {
-                if (e.HResult == -2147024671)
+                if (BlockedBecauseOfVirusHResults.Contains(e.HResult))
                     return true;
 
                 throw e;
             }
         }
+
+        internal IEnumerable<int> BlockedBecauseOfVirusHResults
+            => new[] { -2147467259, -2147024671, -2147024891 };
 
         internal FileSignature GetFileSignature()
         {
