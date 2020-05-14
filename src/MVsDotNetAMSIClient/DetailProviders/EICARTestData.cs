@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Text;
 
 namespace MVsDotNetAMSIClient.DetailProviders
 {
-    internal class EICARTestData
+    public static class EICARTestData
     {
-        internal const string EICARText
+        public const string EICARText
             = @"X5O!P%@AP[4\P" + 
             "ZX54(P^)7CC)7}$E" +
             "ICAR-STANDARD-AN" +
             "TIVIRUS-TEST-FIL" +
             "E!$H+H*";
 
-        internal const string EICARZipped
+        public const string EICARZippedBase64
             = "UEsDBAoAAAAAAOCYu" +
             "Cg8z1FoRAAAAEQAAAAJ" +
             "AAAAZWljYXIuY29tWDV" +
@@ -26,7 +27,10 @@ namespace MVsDotNetAMSIClient.DetailProviders
             "jYXIuY29tUEsFBgAAAA" +
             "ABAAEANwAAAGsAAAAAAA==";
 
-        internal static byte[] EICARZippedBytes
-            => Convert.FromBase64String(EICARZipped);
+        public static byte[] EICARZippedBytes
+            => Convert.FromBase64String(EICARZippedBase64);
+
+        public static byte[] EICARBytes
+            => Encoding.UTF8.GetBytes(EICARText);
     }
 }
