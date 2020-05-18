@@ -3,27 +3,25 @@ using System.Diagnostics;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
-    internal class BlockStopwatch : IDisposable
+    public class BlockStopwatch : IDisposable
     {
         readonly Action<TimeSpan> onClosed;
         readonly Stopwatch stopwatch;
 
-        internal DateTime Start { get; }
+        public DateTime Start { get; }
 
-        internal TimeSpan Elapsed
+        public TimeSpan Elapsed
             => stopwatch.Elapsed;
 
-        internal BlockStopwatch()
+        public BlockStopwatch()
         {
             Start = DateTime.UtcNow;
             stopwatch = Stopwatch.StartNew();
         }
 
-        internal BlockStopwatch(Action<TimeSpan> onClosed)
+        public BlockStopwatch(Action<TimeSpan> onClosed) : this()
         {
             this.onClosed = onClosed;
-            Start = DateTime.UtcNow;
-            stopwatch = Stopwatch.StartNew();
         }
 
         public void Dispose()
