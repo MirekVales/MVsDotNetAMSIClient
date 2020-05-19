@@ -108,6 +108,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             {
                 breakingResult = new ScanResult()
                 {
+                    IsSafe = false,
                     Result = DetectionResult.FileRejected,
                     ResultDetail = e.Message
                 };
@@ -116,6 +117,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             {
                 breakingResult = new ScanResult()
                 {
+                    IsSafe = false,
                     Result = DetectionResult.ApplicationError,
                     ResultDetail = e.ToString()
                 };

@@ -37,6 +37,7 @@ namespace MVsDotNetAMSIClient.DataStructures
                     EngineResultDetail = detail,
                     ElapsedTime = Elapsed,
                 },
+                IsSafe = IsSuccess(result),
                 Result = result,
                 ResultDetail = null,
                 DetectionEngineInfo = CreateDetectionEngineInfo()
@@ -48,6 +49,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             {
                 TimeStamp = Start,
                 ContentInfo = CreateContentInfo(),
+                IsSafe = IsSuccess(result),
                 Result = result,
                 ResultDetail = reason,
                 DetectionResultInfo = new ScanResultDetectionInfo()
@@ -65,6 +67,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             {
                 TimeStamp = Start,
                 ContentInfo = CreateContentInfo(),
+                IsSafe = false,
                 Result = DetectionResult.ApplicationError,
                 ResultDetail = exception.ToString(),
                 DetectionResultInfo = new ScanResultDetectionInfo()
@@ -103,6 +106,14 @@ namespace MVsDotNetAMSIClient.DataStructures
         internal static bool IsBreakResult(DetectionResult result)
             => BreakResults.Contains(result);
 
+        internal static HashSet<DetectionResult> SuccessResults = new HashSet<DetectionResult>(new[] {
+                DetectionResult.Clean
+                , DetectionResult.NotDetected
+                });
+
+        internal static bool IsSuccess(DetectionResult result)
+            => SuccessResults.Contains(result);
+
         ScanResultContentInfo CreateContentInfo()
            => new ScanResultContentInfo()
            {
@@ -117,7 +128,7 @@ namespace MVsDotNetAMSIClient.DataStructures
             => new ScanResultEngineInfo()
             {
                 ClientProcessAppName = ScanContext.Client.Name,
-                ClientProcessUsername = Environment.UserDomainName,
+                ClientProcessUsername = $"{Environment.UserDomainName}\\{Environment.UserName}",
                 EnvironmentMachineName = Environment.MachineName,
                 EnvironmentOSDescription = RuntimeInformation.OSDescription,
                 DetectionEngine = ScanContext.Client.DetectionEngine,

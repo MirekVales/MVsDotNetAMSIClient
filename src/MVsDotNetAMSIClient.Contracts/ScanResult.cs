@@ -21,6 +21,13 @@ namespace MVsDotNetAMSIClient.Contracts
         public ScanResultEngineInfo DetectionEngineInfo { get; set; }
 
         /// <summary>
+        /// Aggregated result of detection
+        /// True indicates no signs of malware
+        /// False indicates a positive result, rejection or application error
+        /// </summary>
+        public bool IsSafe { get; set; }
+
+        /// <summary>
         /// Overall result of detection
         /// </summary>
         public DetectionResult Result { get; set; }

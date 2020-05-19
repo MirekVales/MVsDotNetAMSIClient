@@ -51,6 +51,9 @@ namespace MVsDotNetAMSIClient
             }
         }
 
+        public ScanResult ScanBuffer(byte[] buffer, int length, string contentName)
+            => ScanBuffer(buffer, (uint)length, contentName);
+
         public ScanResult ScanBuffer(byte[] buffer, uint length, string contentName)
         {
             using (var resultBuilder = new ResultBuilder(

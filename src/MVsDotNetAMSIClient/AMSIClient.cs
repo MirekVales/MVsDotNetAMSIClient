@@ -37,10 +37,13 @@ namespace MVsDotNetAMSIClient
             Configuration = configuration;
             DetectionEngine = configuration.DetectionEngine;
 
-            var result = AMSIMethods.AmsiInitialize(
-                Name = $"{AppDomain.CurrentDomain.FriendlyName} ({ProcessID = Process.GetCurrentProcess().Id})", out ContextHandle);
-            result.CheckResult(nameof(AMSIMethods.AmsiInitialize));
-            ContextHandle.CheckHandle();
+            using (var process = Process.GetCurrentProcess())
+            {
+                var result = AMSIMethods.AmsiInitialize(
+                    Name = $"{AppDomain.CurrentDomain.FriendlyName} ({ProcessID = process.Id})", out ContextHandle);
+                result.CheckResult(nameof(AMSIMethods.AmsiInitialize));
+                ContextHandle.CheckHandle();
+            }
         }
 
         public AMSISession CreateSession()
@@ -66,6 +69,9 @@ namespace MVsDotNetAMSIClient
                 return session.ScanString(content, contentName);
         }
 
+        public ScanResult ScanBuffer(byte[] buffer, int length, string contentName)
+            => ScanBuffer(buffer, (uint)length, contentName);
+
         public ScanResult ScanBuffer(byte[] buffer, uint length, string contentName)
         {
             using (var session = CreateSession())
@@ -82,7 +88,10 @@ namespace MVsDotNetAMSIClient
             => ScanString(EICARTestData.EICARText, nameof(EICARTestData.EICARText));
 
         public ScanResult TestEICARByteArray()
-            => ScanBuffer(EICARTestData.EICARZippedBytes, (uint)EICARTestData.EICARZippedBytes.Length, nameof(EICARTestData.EICARZippedBytes));
+            => ScanBuffer(
+                EICARTestData.EICARZippedBytes
+                , (uint)EICARTestData.EICARZippedBytes.Length
+                , nameof(EICARTestData.EICARZippedBytes));
 
         public IEnumerable<DetectionEngineInfo> ListDetectionEngines()
             => AVEngineDetector.ListDetectionEngines();
