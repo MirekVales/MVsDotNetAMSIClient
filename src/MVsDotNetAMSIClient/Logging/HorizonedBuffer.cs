@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -33,6 +34,9 @@ namespace MVsDotNetAMSIClient.Logging
             for (var i = 0; i < steps; i++)
                 Move();
         }
+
+        internal void Purge()
+            => Array.Copy(new int[capacity], buffer, capacity);
 
         public IEnumerator<int> GetEnumerator()
             => Enumerable

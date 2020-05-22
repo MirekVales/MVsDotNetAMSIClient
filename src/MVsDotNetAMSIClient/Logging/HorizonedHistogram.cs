@@ -104,6 +104,23 @@ namespace MVsDotNetAMSIClient.Logging
             }
         }
 
+        public void Purge()
+        {
+            try
+            {
+                readerWriterLockSlim.EnterWriteLock();
+
+                store
+                    .Values
+                    .ToList()
+                    .ForEach(buffer => buffer.Purge());
+            }
+            finally
+            {
+                readerWriterLockSlim.ExitWriteLock();
+            }
+        }
+
         public void Dispose()
             => readerWriterLockSlim?.Dispose();
     }
