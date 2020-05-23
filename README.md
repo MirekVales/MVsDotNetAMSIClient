@@ -21,7 +21,7 @@ Invokes AMSI to scan a file-based content. Internally, a file is split into chun
 * TestEICARString  
 Invokes AMSI to scan a string (containing [EICAR signuature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
 
-* TestEICARString  
+* TestEICARByteArray  
 Invokes AMSI to scan a byte array (containing [EICAR signuature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
 
 * ListDetectionEngines  
