@@ -19,10 +19,10 @@ Invokes AMSI to scan a fileless string for malware.
 Invokes AMSI to scan a file-based content. Internally, a file is split into chunks and several byte arrays are scanned.  
 
 * TestEICARString  
-Invokes AMSI to scan a string (containing [EICAR signuature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
+Invokes AMSI to scan a string (containing [EICAR signature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
 
 * TestEICARByteArray  
-Invokes AMSI to scan a byte array (containing [EICAR signuature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
+Invokes AMSI to scan a byte array (containing [EICAR signature](https://www.eicar.org)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
 
 * ListDetectionEngines  
 Enumerates AV engines registered in system.
