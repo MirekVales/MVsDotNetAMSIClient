@@ -45,7 +45,7 @@ byte[] buffer = content;
 
 using (var client = AMSIClient.Create())
 using (var session = client.CreateSession())
-   return client.ScanBuffer(buffer);
+   return session.ScanBuffer(buffer);
 ```
 
 ## Tested AV Engines
