@@ -3,7 +3,7 @@
     public enum ContentType
     {
         /// <summary>
-        /// Content is of different type than string or byte array
+        /// Content is of different type than file, string or byte array
         /// </summary>
         Other,
         /// <summary>

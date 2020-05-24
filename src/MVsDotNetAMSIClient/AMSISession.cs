@@ -35,7 +35,7 @@ namespace MVsDotNetAMSIClient
                 , ContentType.String
                 , FileType.Unknown
                 , content.Length * 4
-                , content.GetMD5Hash())))
+                , client.Configuration.SkipContentHashing ? null : content.GetMD5Hash())))
             {
                 var result = AMSIMethods.AmsiScanString(
                     client.ContextHandle
@@ -64,7 +64,7 @@ namespace MVsDotNetAMSIClient
                 , ContentType.ByteArray
                 , FileType.Unknown
                 , buffer.LongLength
-                , buffer.GetMD5Hash())))
+                , client.Configuration.SkipContentHashing ? null : buffer.GetMD5Hash())))
             {
                 var result = AMSIMethods.AmsiScanBuffer(
                     client.ContextHandle

@@ -43,7 +43,9 @@ namespace MVsDotNetAMSIClient.DataStructures
             cancellationTokenSource = new CancellationTokenSource();
             using (var signatureReader = new FileSignatureReader(filePath))
                 fileSignature = signatureReader.GetFileSignature();
-            md5Hash = Task.Run(() => fileInfo.GetFileMD5Hash(), cancellationTokenSource.Token);
+            md5Hash = client.Configuration.SkipContentHashing
+                ? Task.FromResult((string)null)
+                : Task.Run(() => fileInfo.GetFileMD5Hash(), cancellationTokenSource.Token);
         }
 
         internal ScanResult GetRejectedResult(string reason)
