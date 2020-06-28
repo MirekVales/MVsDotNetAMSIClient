@@ -3,16 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Mirek Vales</Authors>
-    <ApplicationIcon>package.ico</ApplicationIcon>
-    <PackageIcon>package.ico</PackageIcon>
-    <IconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.ico</IconUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.ico</PackageIconUrl>
+    <ApplicationIcon>package.png</ApplicationIcon>
+    <PackageIcon>package.png</PackageIcon>
+    <IconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.png</IconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.png</PackageIconUrl>
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="package.ico" Pack="true" PackagePath="" />
+    <None Include="package.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
