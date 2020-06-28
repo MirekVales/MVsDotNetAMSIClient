@@ -4,8 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Mirek Vales</Authors>
     <Copyright>Mirek Vales 2020</Copyright>
-    <ApplicationIcon>package.png</ApplicationIcon>
-    <PackageIcon>package.png</PackageIcon>
     <IconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.png</IconUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/MirekVales/MVsDotNetAMSIClient/master/src/MVsDotNetAMSIClient/package.png</PackageIconUrl>
     <IsPackable>true</IsPackable>
