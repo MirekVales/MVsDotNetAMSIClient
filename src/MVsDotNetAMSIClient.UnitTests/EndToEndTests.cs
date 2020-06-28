@@ -75,7 +75,7 @@ namespace MVsDotNetAMSIClient.UnitTests
                     // ASSERT
 
                     Assert.IsTrue(result.IsSafe);
-                    Assert.AreEqual(DetectionResult.NotDetected, result.Result);
+                    Assert.IsTrue(result.Result == DetectionResult.NotDetected || result.Result == DetectionResult.Clean);
                     Assert.IsTrue(HasValidData(result));
                 }
             }

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Polly;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using MVsDotNetAMSIClient.NativeMethods;
+using System.Runtime.InteropServices;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
@@ -64,5 +66,15 @@ namespace MVsDotNetAMSIClient.DataStructures
                 .Select(value => $"{Math.Round(size.Value / Math.Pow(1000, value.index), 2)} {value.name}")
                 .DefaultIfEmpty("")
                 .LastOrDefault();
+
+        internal static T ExecuteInRetryPolicy<T>(
+            this Func<T> action
+            , Func<T, bool> isFaulted
+            , int maxRetryAttempts
+            , TimeSpan cooldownDelay)
+            => Policy
+                .HandleResult(isFaulted)
+                .WaitAndRetry(maxRetryAttempts, retryAttempt => cooldownDelay)
+                .Execute(action);
     }
 }
