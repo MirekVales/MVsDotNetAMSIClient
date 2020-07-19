@@ -37,25 +37,17 @@ namespace MVsDotNetAMSIClient
                 , content.Length * 4
                 , client.Configuration.SkipContentHashing ? null : content.GetMD5Hash())))
             {
-                Func<ScanResult> body = () =>
-                {
-                    var result = AMSIMethods.AmsiScanString(
-                    client.ContextHandle
-                    , content
-                    , contentName
-                    , sessionHandle
-                    , out var resultNumber);
-                    ScanResult scanResult = null;
-                    result.CheckResult(
-                        success: _ => scanResult = resultBuilder.ToResult(resultNumber)
-                        , failure: _ => scanResult = resultBuilder.ToResult(new Win32Exception(result)));
-                    return scanResult;
-                };
-
-                return body.ExecuteInRetryPolicy(
-                    result => result.Result == DetectionResult.ApplicationError
-                    , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , client.Configuration.ScanRetryAttemptDelay);
+                var result = AMSIMethods.AmsiScanString(
+                client.ContextHandle
+                , content
+                , contentName
+                , sessionHandle
+                , out var resultNumber);
+                ScanResult scanResult = null;
+                result.CheckResult(
+                    success: _ => scanResult = resultBuilder.ToResult(resultNumber)
+                    , failure: _ => scanResult = resultBuilder.ToResult(new Win32Exception(result)));
+                return scanResult;
             }
         }
 
@@ -74,26 +66,18 @@ namespace MVsDotNetAMSIClient
                 , buffer.LongLength
                 , client.Configuration.SkipContentHashing ? null : buffer.GetMD5Hash())))
             {
-                Func<ScanResult> body = () =>
-                {
-                    var result = AMSIMethods.AmsiScanBuffer(
-                 client.ContextHandle
-                 , buffer
-                 , length
-                 , contentName
-                 , sessionHandle
-                 , out var resultNumber);
-                    ScanResult scanResult = null;
-                    result.CheckResult(
-                        success: _ => scanResult = resultBuilder.ToResult(resultNumber)
-                        , failure: _ => scanResult = resultBuilder.ToResult(new Win32Exception(result)));
-                    return scanResult;
-                };
-
-                return body.ExecuteInRetryPolicy(
-                    result => result.Result == DetectionResult.ApplicationError
-                    , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , client.Configuration.ScanRetryAttemptDelay);
+                var result = AMSIMethods.AmsiScanBuffer(
+             client.ContextHandle
+             , buffer
+             , length
+             , contentName
+             , sessionHandle
+             , out var resultNumber);
+                ScanResult scanResult = null;
+                result.CheckResult(
+                    success: _ => scanResult = resultBuilder.ToResult(resultNumber)
+                    , failure: _ => scanResult = resultBuilder.ToResult(new Win32Exception(result)));
+                return scanResult;
             }
         }
 
@@ -109,20 +93,12 @@ namespace MVsDotNetAMSIClient
                 else if (signatureReader.IsFileBlocked())
                     return resultBuilder.ToResultBlocked();
 
-            Func<ScanResult> body = () =>
-            {
-                using (var reader = new FileStreamScannerSession(
-                    client
-                    , filePath
-                    , client.Configuration.FileScannerBlockSize
-                    , client.Configuration.FileScannerAcceptZipFileWithEncryptedEntry))
-                    return reader.Scan();
-            };
-
-            return body.ExecuteInRetryPolicy(
-                    result => result.Result == DetectionResult.ApplicationError
-                    , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , client.Configuration.ScanRetryAttemptDelay);
+            using (var reader = new FileStreamScannerSession(
+                client
+                , filePath
+                , client.Configuration.FileScannerBlockSize
+                , client.Configuration.FileScannerAcceptZipFileWithEncryptedEntry))
+                return reader.Scan();
         }
     }
 }

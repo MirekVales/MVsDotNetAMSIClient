@@ -13,10 +13,23 @@ namespace MVsDotNetAMSIClient.UnitTests
         {
             // ARRANGE
 
+            var scan = new Scan();
             using (var client = AMSIClient.Create())
             using (var testItems = new TestItemsBag(client))
             {
                 testItems
+                    .ClientTest(c => scan.EICARString())
+                    .ClientTest(c => scan.EICARByteArray())
+                    .ClientTest(c => scan.String(EICARTestData.EICARText, nameof(EICARTestData.EICARText)))
+                    .ClientTest(c => scan.Buffer(
+                        EICARTestData.EICARZippedBytes
+                        , EICARTestData.EICARZippedBytes.Length
+                        , nameof(EICARTestData.EICARZippedBytes)))
+                    .ClientTest(c => scan.Buffer(
+                        EICARTestData.EICARZippedBytes
+                        , (uint) EICARTestData.EICARZippedBytes.Length
+                        , nameof(EICARTestData.EICARZippedBytes)))
+                    .ClientTest(c => scan.File(testItems.CreateTemporaryFile(EICARTestData.EICARZippedBytes)))
                     .ClientTest(c => c.TestEICARString())
                     .ClientTest(c => c.TestEICARByteArray())
                     .ClientTest(c => c.ScanString(EICARTestData.EICARText, nameof(EICARTestData.EICARText)))

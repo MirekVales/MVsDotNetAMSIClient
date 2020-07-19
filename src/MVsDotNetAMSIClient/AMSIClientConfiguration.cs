@@ -13,17 +13,6 @@ namespace MVsDotNetAMSIClient
         public DetectionEngine DetectionEngine { get; set; }
 
         /// <summary>
-        /// If set, scan that ends up with application exception will be repeated
-        /// until correct result is received or max number of attempts is reached
-        /// </summary>
-        public int? ScanRetryMaxAttempts { get; set; } = 3;
-
-        /// <summary>
-        /// If ScanRetryMaxAttempts is enabled, this delay is applied between attempts
-        /// </summary>
-        public TimeSpan ScanRetryAttemptDelay { get; set; } = TimeSpan.FromSeconds(1);
-
-        /// <summary>
         /// If there are no active active AV/malware engines (according to system registry
         /// or according to information provided in <see cref="DetectionEngine"/>),
         /// client throws exception before performing actual AMSI call
