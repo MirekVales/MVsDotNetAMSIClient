@@ -48,7 +48,9 @@ namespace MVsDotNetAMSIClient.DetailProviders
                         }
             }
             catch
-            {}
+            {
+                throw AMSIException.UnsupportedOperation();
+            }
 
             return engines;
         }

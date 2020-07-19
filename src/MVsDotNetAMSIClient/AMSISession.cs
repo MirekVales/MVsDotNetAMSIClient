@@ -55,7 +55,7 @@ namespace MVsDotNetAMSIClient
                 return body.ExecuteInRetryPolicy(
                     result => result.Result == DetectionResult.ApplicationError
                     , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , TimeSpan.FromSeconds(1));
+                    , client.Configuration.ScanRetryAttemptDelay);
             }
         }
 
@@ -93,7 +93,7 @@ namespace MVsDotNetAMSIClient
                 return body.ExecuteInRetryPolicy(
                     result => result.Result == DetectionResult.ApplicationError
                     , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , TimeSpan.FromSeconds(1));
+                    , client.Configuration.ScanRetryAttemptDelay);
             }
         }
 
@@ -122,7 +122,7 @@ namespace MVsDotNetAMSIClient
             return body.ExecuteInRetryPolicy(
                     result => result.Result == DetectionResult.ApplicationError
                     , client.Configuration.ScanRetryMaxAttempts ?? 1
-                    , TimeSpan.FromSeconds(1));
+                    , client.Configuration.ScanRetryAttemptDelay);
         }
     }
 }

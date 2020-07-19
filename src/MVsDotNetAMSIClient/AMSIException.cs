@@ -31,5 +31,8 @@ namespace MVsDotNetAMSIClient
 
         public static AMSIException FailedToInitializeSession()
             => new AMSIException("AMSI failed to initialize session");
+
+        public static AMSIException UnsupportedOperation()
+            => new AMSIException("This operation is not supported");
     }
 }
