@@ -47,10 +47,10 @@ return new Scan.File(fileToCheck);
 * Buffer scan with max two retries and 1 second delay
 
 ```csharp
-byte[] buffer;
+byte[] content;
 AMSIClientConfiguration configuration;
 
-return new Scan(configuration, 2, TimeSpan.FromSeconds(1)).Buffer(fileToCheck);
+return new Scan(configuration, 2, TimeSpan.FromSeconds(1)).Buffer(content);
 ```
 
 * Buffer scan with session, using AMSIClient class directly 
