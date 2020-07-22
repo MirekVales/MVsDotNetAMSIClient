@@ -36,15 +36,24 @@ Enumerates AV engines registered in system.
 
 ## Example of Use
 
-* Sessionless file scan
+* File scan
 
 ```csharp
 var fileToCheck = @"Q:\EmailAttachments\Quarantine\2020\April\15\photos.zip";
 
-using (var client = AMSIClient.Create())
-    return client.ScanFile(fileToCheck);
+return new Scan.File(fileToCheck);
 ```
-* Buffer scan with session
+
+* Buffer scan with max two retries and 1 second delay
+
+```csharp
+byte[] buffer;
+AMSIClientConfiguration configuration;
+
+return new Scan(configuration, 2, TimeSpan.FromSeconds(1)).Buffer(fileToCheck);
+```
+
+* Buffer scan with session, using AMSIClient class directly 
 
 ```csharp
 byte[] buffer = content;
