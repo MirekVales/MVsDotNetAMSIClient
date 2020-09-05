@@ -10,6 +10,9 @@ using MVsDotNetAMSIClient.Contracts;
 using MVsDotNetAMSIClient.Contracts.Enums;
 using MVsDotNetAMSIClient.DetailProviders;
 using MVsDotNetAMSIClient.DataStructures.Streams;
+using MVsFileTypes.Analysis;
+using MVsFileTypes.Predefined;
+using MVsFileTypes.Contracts;
 
 namespace MVsDotNetAMSIClient.DataStructures
 {
@@ -22,7 +25,7 @@ namespace MVsDotNetAMSIClient.DataStructures
         readonly int blockSize;
         readonly CancellationTokenSource cancellationTokenSource;
         readonly Task<string> md5Hash;
-        readonly FileSignature fileSignature;
+        readonly MVsFileTypes.Contracts.FileSignature fileSignature;
         readonly bool acceptEncryptedZipEntries;
 
         internal FileStreamScanner(
@@ -41,7 +44,7 @@ namespace MVsDotNetAMSIClient.DataStructures
 
             buffer = new byte[blockSize];
             cancellationTokenSource = new CancellationTokenSource();
-            using (var signatureReader = new FileSignatureReader(filePath))
+            using (var signatureReader = new FileSignatureReader(filePath, Signatures.Get()))
                 fileSignature = signatureReader.GetFileSignature();
             md5Hash = client.Configuration.SkipContentHashing
                 ? Task.FromResult((string)null)
@@ -55,27 +58,27 @@ namespace MVsDotNetAMSIClient.DataStructures
                 , null
                 , filePath
                 , ContentType.File
-                , fileSignature.FileType
+                , ConvertFileType(fileSignature.FileType)
                 , fileInfo.Length
                 , null)))
                 return builder.ToResult(DetectionResult.FileRejected, reason);
         }
 
-        internal IInputStream InitiateStream(FileType fileType)
+        internal IInputStream InitiateStream(Contracts.Enums.FileType fileType)
             => InputStreamsFunc[fileType]();
 
-        IDictionary<FileType, Func<IInputStream>> InputStreamsFunc
-            => new Dictionary<FileType, Func<IInputStream>>()
+        IDictionary<Contracts.Enums.FileType, Func<IInputStream>> InputStreamsFunc
+            => new Dictionary<Contracts.Enums.FileType, Func<IInputStream>>()
         {
-            { FileType.Unknown, () => new InputStream(filePath, blockSize)},
-            { FileType.Executable, () => new InputStream(filePath, blockSize)},
-            { FileType.MicrosoftOfficeDocument, () => new InputStream(filePath, blockSize)},
-            { FileType.CompoundFileBinary, () => new InputStream(filePath, blockSize)},
-            { FileType.PDF, () => new InputStream(filePath, blockSize)},
-            { FileType.Bzip2, () => new InputStream(filePath, blockSize, fileStream => new BZip2InputStream(fileStream))},
-            { FileType.GZip, () => new InputStream(filePath, blockSize, fileStream => new GZipInputStream(fileStream, blockSize))},
-            { FileType.Tar, () => new TarArchiveStream(filePath, blockSize)},
-            { FileType.Zip, () => new ZipArchiveStream(filePath, blockSize, !acceptEncryptedZipEntries)}
+            { Contracts.Enums.FileType.Unknown, () => new InputStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.Executable, () => new InputStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.MicrosoftOfficeDocument, () => new InputStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.CompoundFileBinary, () => new InputStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.PDF, () => new InputStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.Bzip2, () => new InputStream(filePath, blockSize, fileStream => new BZip2InputStream(fileStream))},
+            { Contracts.Enums.FileType.GZip, () => new InputStream(filePath, blockSize, fileStream => new GZipInputStream(fileStream, blockSize))},
+            { Contracts.Enums.FileType.Tar, () => new TarArchiveStream(filePath, blockSize)},
+            { Contracts.Enums.FileType.Zip, () => new ZipArchiveStream(filePath, blockSize, !acceptEncryptedZipEntries)}
         };
 
         internal IEnumerable<long> GetOverlaps(long streamLength)
@@ -83,7 +86,8 @@ namespace MVsDotNetAMSIClient.DataStructures
                 .Select(index => (long)index * blockSize - blockSize / 2);
 
         internal bool IsArchive
-            => new[] { FileType.Bzip2, FileType.GZip, FileType.Tar, FileType.Zip }.Contains(fileSignature.FileType);
+            => new[] { Contracts.Enums.FileType.Bzip2, Contracts.Enums.FileType.GZip, Contracts.Enums.FileType.Tar, Contracts.Enums.FileType.Zip }
+            .Contains(ConvertFileType(fileSignature.FileType));
 
         internal bool ExceedsMaxFileSize(long? maxSize)
             => maxSize.HasValue && maxSize < fileInfo.Length;
@@ -92,12 +96,12 @@ namespace MVsDotNetAMSIClient.DataStructures
             => IsArchive && maxArchiveSize.HasValue && maxArchiveSize < fileInfo.Length;
 
         internal bool TryScanArchiveOrBinary(bool scanOverlaps, out ScanResult lastResult, out ScanResult breakingResult)
-            => TryScan(fileSignature.FileType, scanOverlaps, out lastResult, out breakingResult);
+            => TryScan(ConvertFileType(fileSignature.FileType), scanOverlaps, out lastResult, out breakingResult);
 
         internal bool TryScanBinary(bool scanOverlaps, out ScanResult lastResult, out ScanResult breakingResult)
-            => TryScan(FileType.Unknown, scanOverlaps, out lastResult, out breakingResult);
+            => TryScan(Contracts.Enums.FileType.Unknown, scanOverlaps, out lastResult, out breakingResult);
 
-        bool TryScan(FileType fileType, bool scanOverlaps, out ScanResult lastResult, out ScanResult breakingResult)
+        bool TryScan(Contracts.Enums.FileType fileType, bool scanOverlaps, out ScanResult lastResult, out ScanResult breakingResult)
         {
             ScanResult anyResult = null;
 
@@ -131,16 +135,21 @@ namespace MVsDotNetAMSIClient.DataStructures
                 anyResult.ContentInfo.ContentHash = md5Hash.GetAwaiter().GetResult();
                 anyResult.ContentInfo.ContentName = filePath;
                 anyResult.ContentInfo.ContentType = ContentType.File;
-                anyResult.ContentInfo.ContentFileType = fileSignature.FileType;
+                anyResult.ContentInfo.ContentFileType = ConvertFileType(fileSignature.FileType);
             }
 
             lastResult = anyResult;
             return breakingResult == null;
         }
 
+        Contracts.Enums.FileType ConvertFileType(SignatureType fileType)
+            => Enum.TryParse<Contracts.Enums.FileType>(fileType.ToString(), true, out var result)
+            ? result
+            : Contracts.Enums.FileType.Unknown;
+
         long streamLength = 0;
 
-        IEnumerable<ScanResult> ScanStream(FileType fileType, bool scanOverlaps)
+        IEnumerable<ScanResult> ScanStream(Contracts.Enums.FileType fileType, bool scanOverlaps)
         {
             streamLength = 0L;
             using (var stream = InitiateStream(fileType))
