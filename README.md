@@ -1,11 +1,11 @@
 # MV's DotNet AMSI Client
 A convenient .NET client for [Microsoft's Antimalware Scan Interface (AMSI)](https://docs.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal). 
  
-AMSI is an interface standard that defines methods for file-based or stream-based content scanning for malware. AMSI is a part of Microsoft Windows OS, beginning from Windows 10 or Windows Server 2016. Operating system internally calls AMSI to dynamically evaluate a content that is about to be executed, e.g. JavaScript, PowerShell scripts.  
+AMSI is an interface standard that defines methods for file-based or stream-based content scanning for malware. AMSI is a part of Microsoft Windows OS, beginning from Windows 10 or Windows Server 2016. Operating system internally calls AMSI to request an evaluation of content that is about to be executed, e.g. JavaScript, PowerShell scripts.  
 
-On other side, AMSI is implemented by major AV engines (e.g. Kaspersky, ESET, BitDefender), hence, once a third-party AV engine is installed on the computer, it can replace default Windows Defender, and AMSI effectively ends up invoking the third-party engine instead of Defender.  
+On other side, AMSI is implemented by major AV engines (e.g. Kaspersky, ESET, BitDefender) that are able to evaluate a content for malware and detect possible threats. Once a third-party AV engine is installed on the computer, it can replace the default AMSI-aware engine, Windows Defender Antivirus. So operating system, that calls AMSI, effectively ends up invoking the third-party engine instead of Defender Antivirus. If no AMSI-aware third-party engine is available, the security evaluation requested over AMSI is provided by Defender.  
 
-This client library is a compact solution that enables calling AMSI methods conveniently, adds an option to scan a file-based content, including zip file inspection, and also, it can correlate a detection result detail (for now, only if Windows Defender is used).    
+This client library is a compact solution that enables calling AMSI methods conveniently, adds an option to scan a file-based content, including zip file inspection, and also, it can correlate a detection result detail (for now, only if Windows Defender Antivirus is used). It can serve as a tool to test AMSI-enabled engine, or as a library that allows to provide security features requested over AMSI as service.  
 
 ## Available as NuGet Package
 
@@ -41,7 +41,7 @@ Enumerates AV engines registered in system.
 ```csharp
 var fileToCheck = @"Q:\EmailAttachments\Quarantine\2020\April\15\photos.zip";
 
-return new Scan.File(fileToCheck);
+return new Scan().File(fileToCheck);
 ```
 
 * Buffer scan with max two retries and 1 second delay
@@ -63,8 +63,7 @@ using (var session = client.CreateSession())
    return session.ScanBuffer(buffer);
 ```
 
-## Tested AV Engines
-
+## Tested AMSI-aware AV Engines
 
 
 * Windows Defender (including detection detail retrieval)
@@ -76,14 +75,17 @@ using (var session = client.CreateSession())
 
 ## FAQ
 
+### What is the motivation behind this client?
+Despite not perfect, AMSI is a good start and very good effort by Microsoft. It brings one security interface that can be implemented by various AV engines and that allows to reduce JavaScript, VBA or PShell's attack surfaces. Beside, AMSI can be used as an entry point for security scan feature no matter what engine you use. This AMSI .NET client delivers all related features necessary to invoke AMSI methods and also adds ad lib few features to support and make more advanced use cases convenient.    
+
 ### Is this an official project?
 No, this is not an official client. At this moment, this the most advanced implementation of client library that makes possible to smoothly invoke AMSI methods. It is worth of stating explicitely, the project is not affined with Microsoft or any of AV engine vendors. Trademarks are owned by their respective owners, and the project is not meant to interfere with their rights.  
 
 ### What is the use of AMSI session?
 The original purpose is to correlate together scanning of several data fragments. If scans are done within one session, the session information is passed to AV engine, and the engine hypothetically can use the indication to provide more efficient evaluation or better consolidation of detection results. If you want to invoke a scan of separate files or data chunks, it can make sense to skip the session. In that case, a session will be created for each call internally. 
 
-### Why there is an additional method for scanning a file?  
-AMSI as such does not define any method that allows to scan a file-based content. It makes sense since it is meant to be mostly used to scan a content that was already loaded into memory. However, file scanning is a useful feature, so this client implements it additionaly. 
+### Why is there an additional method for scanning a file?  
+AMSI as such does not define any method that allows to scan a file-based content. It makes sense since it is meant to be mostly used to scan a content that was already loaded into memory and is about to be executed. However, file scanning is a useful feature, so this client implements it additionaly. 
 
 ### How is file scanning implemented?
 AMSI as such allows to scan string or buffer (byte array) only. This library provides a method that splits a file stream into chunks and invokes scan of each data chunk, all together in one session. Also, [SharpZipLib](https://github.com/icsharpcode/SharpZipLib) is involved to provide an inspection of contents in case the file is zip or tar archive. Therefore, binary file parts are passed to AMSI just chunk by chunk. If the file is an archive, the base stream and also the content stream is passed to AMSI. This increases the scan efficiency, but obviously it is more time consuming. Also, only the first level content stream is evaluated, so in case an archive is contained in another archive, its data contents are not inspected. 
