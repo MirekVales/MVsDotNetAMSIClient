@@ -1,10 +1,13 @@
 # MV's DotNet AMSI Client
 A convenient .NET client for [Microsoft's Antimalware Scan Interface (AMSI)](https://docs.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal). 
- 
+You can use it to easily scan a data for malware using Windows Defender Antivirus or other AMSI-aware antiviruses.
+
+## What is AMSI?
 AMSI is an interface standard that defines methods for file-based or stream-based content scanning for malware. AMSI is a part of Microsoft Windows OS, beginning from Windows 10 or Windows Server 2016. Operating system internally calls AMSI to request an evaluation of content that is about to be executed, e.g. JavaScript, PowerShell scripts.  
 
 On other side, AMSI is implemented by major AV engines (e.g. Kaspersky, ESET, BitDefender) that are able to evaluate a content for malware and detect possible threats. Once a third-party AV engine is installed on the computer, it can replace the default AMSI-aware engine, Windows Defender Antivirus. So operating system, that calls AMSI, effectively ends up invoking the third-party engine instead of Defender Antivirus. If no AMSI-aware third-party engine is available, the security evaluation requested over AMSI is provided by Defender.  
 
+## What is MV's DotNet AMSI Client?
 This client library is a compact solution that enables calling AMSI methods conveniently, adds an option to scan a file-based content, including zip file inspection, and also, it can correlate a detection result detail (for now, only if Windows Defender Antivirus is used). It can serve as a tool to test AMSI-enabled engine, or as a library that allows to provide security features requested over AMSI as service.  
 
 ## Available as NuGet Package
@@ -31,7 +34,7 @@ Invokes AMSI to scan a string (containing [EICAR dummy virus signature](https://
 Invokes AMSI to scan a byte array (containing [EICAR dummy virus signature](https://www.eicar.org/?page_id=3950)) for malware. This method can be used to verify integration of AV engine since a call should result into a positive detection due to the EICAR signature.  
 
 * ListDetectionEngines  
-Enumerates AV engines registered in system.
+Enumerates AV engines registered in system. This feature does not work on Microsoft Windows Server.
 
 
 ## Example of Use
@@ -66,7 +69,7 @@ using (var session = client.CreateSession())
 ## Tested AMSI-aware AV Engines
 
 
-* Windows Defender (including detection detail retrieval)
+* Windows Defender Antivirus (including detection detail retrieval)
 
 * ESET NOD32 Antivirus
 
@@ -78,7 +81,7 @@ using (var session = client.CreateSession())
 ### What is the motivation behind this client?
 Despite not perfect, AMSI is a good start and very good effort by Microsoft. It brings one security interface that can be implemented by various AV engines and that allows to reduce JavaScript, VBA or PShell's attack surfaces. Beside, AMSI can be used as an entry point for security scan feature no matter what engine you use. This AMSI .NET client delivers all related features necessary to invoke AMSI methods and also adds ad lib few features to support and make more advanced use cases convenient.    
 
-### Is this an official project?
+### Is this an official project affined with Microsoft?
 No, this is not an official client. At this moment, this the most advanced implementation of client library that makes possible to smoothly invoke AMSI methods. It is worth of stating explicitely, the project is not affined with Microsoft or any of AV engine vendors. Trademarks are owned by their respective owners, and the project is not meant to interfere with their rights.  
 
 ### What is the use of AMSI session?
